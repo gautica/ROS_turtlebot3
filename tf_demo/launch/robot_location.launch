@@ -1,0 +1,13 @@
+<launch>
+	<param name="/use_sim_time" value="true"/>
+	
+	<!-- Run stage -->
+	<node pkg="stage_ros" type="stageros" name="stage" args="$(find stage_ros)/world/willow-erratic.world"/>
+	<node pkg="my_stage" type="stopper" name="stopper"/>
+	
+	<!-- Publish a static transformation between /odom and /map -->
+	<node name="tf" pkg="tf" type="static_transform_publisher" args="-11.28 23.27 0 0 0 0 /odom /map 100" />
+	
+	<!-- Run node -->
+	<node name="robot_location" pkg="tf_demo" type="robot_location" output="screen" />
+</launch>
