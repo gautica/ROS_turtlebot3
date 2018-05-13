@@ -2,13 +2,13 @@
 #define GUI_THREAD_H
 
 #include <QThread>
-#include "movebase.h"
-
 namespace global_planner {
+
+class MoveBase;
 class GUI_Thread : public QThread
 {
 private:
-  global_planner::MoveBase* move_base;
+  MoveBase* move_base;
 public:
   explicit GUI_Thread();
   ~GUI_Thread();

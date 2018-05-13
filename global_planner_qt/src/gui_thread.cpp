@@ -1,4 +1,5 @@
 #include "gui_thread.h"
+#include "movebase.h"
 
 namespace global_planner {
 GUI_Thread::GUI_Thread()

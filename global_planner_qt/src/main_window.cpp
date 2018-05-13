@@ -18,6 +18,8 @@
 #include <QRgb>
 #include <QTimer>
 #include "movebase.h"
+#include "mapthread.h"
+#include "mutex.h"
 
 /*****************************************************************************
 ** Namespaces
@@ -31,10 +33,10 @@ using namespace Qt;
 ** Implementation [MainWindow]
 *****************************************************************************/
 
-MainWindow::MainWindow(QWidget *parent)  : QMainWindow(parent), ui(new Ui::MainWindowDesign)
+MainWindow::MainWindow(QWidget *parent)  : QMainWindow(parent), ui(new Ui::MainWindow)
 {
   ui->setupUi(this); // Calling this incidentally connects all ui's triggers to on_...() callbacks in this class.
-
+  /**
   label = new QLabel(this);
   label->setBackgroundRole(QPalette::Base);
   label->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
@@ -48,7 +50,9 @@ MainWindow::MainWindow(QWidget *parent)  : QMainWindow(parent), ui(new Ui::MainW
   this->setCentralWidget(scrollArea);
   this->setWindowTitle("Map Viewer");
   this->resize(QSize(500, 500));
-
+*/
+  connect(ui->quit, SIGNAL(clicked(bool)), this, SLOT(quit_simulation()));
+  connect(ui->start, SIGNAL(clicked(bool)), this, SLOT(start_simulation()));
   timer = new QTimer;
   timer->setInterval(10);
   connect(timer, SIGNAL(timeout()), this, SLOT(update_roboter_pos()));
@@ -56,29 +60,32 @@ MainWindow::MainWindow(QWidget *parent)  : QMainWindow(parent), ui(new Ui::MainW
 }
 
 MainWindow::~MainWindow() {
-  delete label;
-  delete scrollArea;
+  //delete label;
+  //delete scrollArea;
   delete ui;
 }
 
 void MainWindow::drawMap()
 {
-  int rows = MoveBase::grid.size();
-  int cols = MoveBase::grid[0].size();
+  int rows = MapThread::ROW;
+  int cols = MapThread::COL;
   image = QImage(QSize(rows, cols), QImage::Format_ARGB32);
   QRgb value;
   for (int i = 0; i < rows; i++) {
     for (int j = 0; j < cols; j++) {      
-      if (MoveBase::grid[i][j] == 0) {
-        value = qRgb(255, 255, 255);  // white
-      } else if (MoveBase::grid[i][j] == -1) {
-        value = qRgb(128, 128, 128);  // gray
+      if (MapThread::gridMap[i][j] == 0) {
+        value = qRgb(255, 255, 255);  // white free
+      } else if (MapThread::gridMap[i][j] == -1) {
+        value = qRgb(128, 128, 128);  // gray unknow
+      } else if (MapThread::gridMap[i][j] == 110) {
+        value = qRgb(255, 0, 0);      // rot for costmap
       } else {
-        value = qRgb(0, 0, 0);        // black
+        value = qRgb(0, 0, 0);        // black block
       }
       image.setPixel(QPoint(j, i), value);
     }
   }
+  //std::cout << "debug a \n";
   drawPath();
   // Init roboter position on map
   this->roboter_pos.first = MoveBase::roboter_pos.first;
@@ -87,39 +94,32 @@ void MainWindow::drawMap()
   value = qRgb(0, 0, 255);   // blue for roboter
   rows = MoveBase::roboter_local_field.size();
   cols = MoveBase::roboter_local_field[0].size();
-  for (int i = - (rows / 2); i <= rows; i++) {
-    for (int j = -(cols / 2); j <= cols; j++) {
+  //std::cout << "rows = " << rows << " cols = " << cols << "\n";
+  for (int i = 0; i <= rows; i++) {
+    for (int j = 0; j <= cols; j++) {
       image.setPixel(QPoint(roboter_pos.second+i, roboter_pos.first+j), value);
     }
   }
-  label->setPixmap(QPixmap::fromImage(image));
+  //std::cout << "debug b \n";
+  //label->setPixmap(QPixmap::fromImage(image));
 }
 
 void MainWindow::drawPath()
 {
-  std::cout << "here in drawPath()" << "\n";
   QRgb value;
-  for (int i = 0; i < MoveBase::plan.size(); i++) {
-    value = qRgb(255, 0, 0);
-    int row = MoveBase::plan[i].first;
-    int col = MoveBase::plan[i].second;
-    image.setPixel(QPoint(col, row), value);
-/**
-    // draw left tunnel
+  for (int i = 0; i < MapThread::path.size(); i++) {
     value = qRgb(0, 255, 0);
-    row = MoveBase::tunnel_l[i].first;
-    col = MoveBase::tunnel_l[i].second;
+    int row = MapThread::path[i].first;
+    int col = MapThread::path[i].second;
     image.setPixel(QPoint(col, row), value);
-    // draw right tunnel
-    row = MoveBase::tunnel_r[i].first;
-    col = MoveBase::tunnel_r[i].second;
-    image.setPixel(QPoint(col, row), value);
-    */
   }
 }
 
 void MainWindow::update_roboter_pos()
 {
+  //std::cout << "here in update_map \n";
+  drawMap();    // update map
+  //std::cout << "debug 0 \n";
   QRgb value = qRgb(255, 255, 255);   // white for delete
   // delete old position of roboter
   int rows = MoveBase::roboter_local_field.size();
@@ -129,7 +129,7 @@ void MainWindow::update_roboter_pos()
       image.setPixel(QPoint(roboter_pos.second+i, roboter_pos.first+j), value);
     }
   }
-
+  //std::cout << "debug 1 \n";
   // Record roboter position
   this->roboter_pos.first = MoveBase::roboter_pos.first;
   this->roboter_pos.second = MoveBase::roboter_pos.second;
@@ -141,8 +141,20 @@ void MainWindow::update_roboter_pos()
       image.setPixel(QPoint(roboter_pos.second+i, roboter_pos.first+j), value);
     }
   }
-  label->setPixmap(QPixmap::fromImage(image));
+  //std::cout << "debug 3 \n";
+  ui->label->setPixmap(QPixmap::fromImage(image));
+  //std::cout << "here out update_map \n";
 }
 
+void MainWindow::quit_simulation()
+{
+  quitSim = true;
+}
+
+void MainWindow::start_simulation()
+{
+  quitSim = false;
+  condition.wakeAll();
+}
 }  // namespace global_planner
 

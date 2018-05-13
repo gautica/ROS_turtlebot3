@@ -50,8 +50,10 @@ private:
   void drawPath();
 public Q_SLOTS:
   void update_roboter_pos();
+  void quit_simulation();
+  void start_simulation();
 private:
-  Ui::MainWindowDesign *ui;
+  Ui::MainWindow *ui;
 };
 
 }  // namespace global_planner_qt

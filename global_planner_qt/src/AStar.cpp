@@ -28,7 +28,7 @@ bool AStar::isValid(int row, int col, int ROW, int COL)
 bool AStar::isUnBlocked(const std::vector<std::vector<int> > &grid, const int row, const int col)
 {
     // Returns true if the cell is not blocked else false
-    if (grid[row][col] == 0)
+    if (grid[row][col] == 0 || grid[row][col] == -1)
         return true;
     else
         return false;
@@ -52,6 +52,7 @@ double AStar::calculateHValue(int row, int col, const Pair &dest)
 void AStar::tracePath(cell** cellDetails, const Pair &dest, std::vector<Pair> &plan)
 {
     printf ("\nThe Path is ");
+    plan.clear();
     int row = dest.first;
     int col = dest.second;
 
@@ -71,12 +72,6 @@ void AStar::aStarSearch(const std::vector<std::vector<int> > &grid, const Pair &
 {
 	int ROW = grid.size();
 	int COL = grid[0].size();
-    // If the source is out of range
-    if (isValid (start.first, start.second, ROW, COL) == false)
-    {
-        printf ("Source is invalid\n");
-        return;
-    }
 
     // If the destination is out of range
     if (isValid (dest.first, dest.second, ROW, COL) == false)
