@@ -39,7 +39,7 @@ public:
   QImage image;
   QTimer* timer;
 
-  std::pair<int, int> roboter_pos;
+  std::pair<int, int> roboter_pos_gui;
 
 public:
   MainWindow(QWidget *parent = 0);

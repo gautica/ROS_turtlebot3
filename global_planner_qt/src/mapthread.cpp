@@ -1,17 +1,18 @@
 #include "mapthread.h"
+#include<geometry_msgs/Twist.h>
 #include "AStar.h"
-#include "movebase.h"
-#include "mutex.h"
+#include "param.h"
 
 
 namespace global_planner {
-
+/**
 std::vector<std::vector<int> > MapThread::gridMap;
 std::vector<std::pair<int, int> > MapThread::path;
 int MapThread::ROW;
 int MapThread::COL;
-double MapThread::mapResolution;
 
+double MapThread::mapResolution;
+*/
 MapThread::MapThread()
 {
   isMapInit = false;
@@ -19,11 +20,20 @@ MapThread::MapThread()
   this->astar = new AStar;
   map_sub = nh.subscribe("/map", 1, &MapThread::updateMap, this);
   pub_vel = nh.advertise<geometry_msgs::Twist>("/cmd_vel", 1);
+  initMap();
 }
 
 MapThread::~MapThread()
 {
   delete astar;
+}
+
+void MapThread::initMap()
+{
+  while (!isMapInit) {
+    ros::spinOnce();
+  }
+  ROS_INFO("map is initialized ...");
 }
 
 void MapThread::run()
@@ -58,7 +68,7 @@ void MapThread::makePlan()
   mutex.lock();   // lock, because path is also in movebase.cpp used
   std::cout << "in makePlan(), has clock \n";
   pubZeroVel();   // stop roboter while recreate the path
-  this->astar->aStarSearch(gridMap, MoveBase::roboter_pos, MoveBase::goal, path);
+  this->astar->aStarSearch(gridMap, roboter_pos, goal, path);
   mutex.unlock();
   std::cout << "in makePlan(), release clock \n";
 }
@@ -100,9 +110,9 @@ void MapThread::calc_costMap()
 void MapThread::updateMap(const nav_msgs::OccupancyGridConstPtr map)
 {
   //std::cout << "here in updateMap() \n";
-  this->ROW = map->info.height;
-  this->COL = map->info.width;
-  this->mapResolution = map->info.resolution;
+  ROW = map->info.height;
+  COL = map->info.width;
+  mapResolution = map->info.resolution;
   // Init gridMap, if first get map
   if (!isMapInit) {
     gridMap.resize(ROW);

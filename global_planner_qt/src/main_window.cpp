@@ -17,9 +17,7 @@
 #include <QImage>
 #include <QRgb>
 #include <QTimer>
-#include "movebase.h"
-#include "mapthread.h"
-#include "mutex.h"
+#include "param.h"
 
 /*****************************************************************************
 ** Namespaces
@@ -67,17 +65,15 @@ MainWindow::~MainWindow() {
 
 void MainWindow::drawMap()
 {
-  int rows = MapThread::ROW;
-  int cols = MapThread::COL;
-  image = QImage(QSize(rows, cols), QImage::Format_ARGB32);
+  image = QImage(QSize(ROW, COL), QImage::Format_ARGB32);
   QRgb value;
-  for (int i = 0; i < rows; i++) {
-    for (int j = 0; j < cols; j++) {      
-      if (MapThread::gridMap[i][j] == 0) {
+  for (int i = 0; i < ROW; i++) {
+    for (int j = 0; j < COL; j++) {
+      if (gridMap[i][j] == 0) {
         value = qRgb(255, 255, 255);  // white free
-      } else if (MapThread::gridMap[i][j] == -1) {
+      } else if (gridMap[i][j] == -1) {
         value = qRgb(128, 128, 128);  // gray unknow
-      } else if (MapThread::gridMap[i][j] == 110) {
+      } else if (gridMap[i][j] == 110) {
         value = qRgb(255, 0, 0);      // rot for costmap
       } else {
         value = qRgb(0, 0, 0);        // black block
@@ -85,65 +81,56 @@ void MainWindow::drawMap()
       image.setPixel(QPoint(j, i), value);
     }
   }
-  //std::cout << "debug a \n";
-  drawPath();
   // Init roboter position on map
-  this->roboter_pos.first = MoveBase::roboter_pos.first;
-  this->roboter_pos.second = MoveBase::roboter_pos.second;
+  this->roboter_pos_gui.first = roboter_pos.first;
+  this->roboter_pos_gui.second = roboter_pos.second;
   // Draw new position of roboter
   value = qRgb(0, 0, 255);   // blue for roboter
-  rows = MoveBase::roboter_local_field.size();
-  cols = MoveBase::roboter_local_field[0].size();
-  //std::cout << "rows = " << rows << " cols = " << cols << "\n";
+  int rows = roboter_local_field.size();
+  int cols = roboter_local_field[0].size();
   for (int i = 0; i <= rows; i++) {
     for (int j = 0; j <= cols; j++) {
-      image.setPixel(QPoint(roboter_pos.second+i, roboter_pos.first+j), value);
+      image.setPixel(QPoint(roboter_pos_gui.second+i, roboter_pos_gui.first+j), value);
     }
   }
-  //std::cout << "debug b \n";
-  //label->setPixmap(QPixmap::fromImage(image));
 }
 
 void MainWindow::drawPath()
 {
   QRgb value;
-  for (int i = 0; i < MapThread::path.size(); i++) {
+  for (int i = 0; i < path.size(); i++) {
     value = qRgb(0, 255, 0);
-    int row = MapThread::path[i].first;
-    int col = MapThread::path[i].second;
+    int row = path[i].first;
+    int col = path[i].second;
     image.setPixel(QPoint(col, row), value);
   }
 }
 
 void MainWindow::update_roboter_pos()
 {
-  //std::cout << "here in update_map \n";
   drawMap();    // update map
-  //std::cout << "debug 0 \n";
+  drawPath();   // update path
   QRgb value = qRgb(255, 255, 255);   // white for delete
   // delete old position of roboter
-  int rows = MoveBase::roboter_local_field.size();
-  int cols = MoveBase::roboter_local_field[0].size();
+  int rows = roboter_local_field.size();
+  int cols = roboter_local_field[0].size();
   for (int i = - (rows / 2); i <= rows; i++) {
     for (int j = -(cols / 2); j <= cols; j++) {
-      image.setPixel(QPoint(roboter_pos.second+i, roboter_pos.first+j), value);
+      image.setPixel(QPoint(roboter_pos_gui.second+i, roboter_pos_gui.first+j), value);
     }
   }
-  //std::cout << "debug 1 \n";
   // Record roboter position
-  this->roboter_pos.first = MoveBase::roboter_pos.first;
-  this->roboter_pos.second = MoveBase::roboter_pos.second;
+  this->roboter_pos_gui.first = roboter_pos.first;
+  this->roboter_pos_gui.second = roboter_pos.second;
 
   // Draw new position of roboter
   value = qRgb(0, 0, 255);   // blue for roboter
   for (int i = - (rows / 2); i <= rows; i++) {
     for (int j = -(cols / 2); j <= cols; j++) {
-      image.setPixel(QPoint(roboter_pos.second+i, roboter_pos.first+j), value);
+      image.setPixel(QPoint(roboter_pos_gui.second+i, roboter_pos_gui.first+j), value);
     }
   }
-  //std::cout << "debug 3 \n";
   ui->label->setPixmap(QPixmap::fromImage(image));
-  //std::cout << "here out update_map \n";
 }
 
 void MainWindow::quit_simulation()

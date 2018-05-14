@@ -14,13 +14,6 @@ class MapThread : public QThread
 private:
   AStar* astar;
 public:
-  const static double MIN_SCAN_ANGLE_RAD = 30.0 / 180.0 * M_PI;
-  const static float MIN_PROXIMITY_RANGE_M = 0.3;
-  static std::vector<std::vector<int> > gridMap;
-  static std::vector<std::pair<int, int> > path;
-  static int ROW;
-  static int COL;
-  static double mapResolution;
   bool isMapInit;
   bool isPathInit;
 
@@ -34,6 +27,7 @@ public:
   void run();
   void makePlan();
 private:
+  void initMap();
   void updateMap(const nav_msgs::OccupancyGridConstPtr map);
   void calc_costMap();
   bool isPathBlocked();

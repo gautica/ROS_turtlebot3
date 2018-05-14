@@ -1,13 +1,7 @@
 #include "movebase.h"
-#include "mapthread.h"
-#include "mutex.h"
+#include "param.h"
 
 namespace global_planner {
-
-std::vector<std::vector<int> > MoveBase::roboter_local_field;
-std::pair<int, int> MoveBase::roboter_pos;
-std::pair<int, int> MoveBase::goal;
-
 MoveBase::MoveBase()
 {
   sub_odom = nh.subscribe("/odom", 1, &MoveBase::odom_callback, this);
@@ -23,7 +17,7 @@ MoveBase::MoveBase()
 void MoveBase::init() {
   // Waiting bis roboter_pos position initialized
   std::cout << "wait roboter position initialization \n";
-  while (this->roboter_pos.first == 0) {
+  while (!is_roboter_pos_init) {
     ros::spinOnce();
   }
 
@@ -81,6 +75,7 @@ void MoveBase::odom_callback(const nav_msgs::OdometryConstPtr& msg) {
 
   // initialize roboter_pos position as current position
   calc_coordinate_matrix(current_pose.x, current_pose.y, roboter_pos);
+  is_roboter_pos_init = true;
 }
 
 void MoveBase::scan_callback(const sensor_msgs::LaserScan::ConstPtr& msg)
@@ -114,6 +109,7 @@ void MoveBase::scan_callback(const sensor_msgs::LaserScan::ConstPtr& msg)
   }
 
   //ROS_INFO_STREAM("Closest Range: "  << closest_range);
+  /**
   if (closest_range < MIN_PROXIMITY_RANGE_M)
   {
     ROS_INFO("seeing block ...");
@@ -123,6 +119,7 @@ void MoveBase::scan_callback(const sensor_msgs::LaserScan::ConstPtr& msg)
   }
   speed = FAST;
   steps = LONG;
+  */
 }
 
 
@@ -131,10 +128,10 @@ void MoveBase::rotate(geometry_msgs::Twist &twist)
 {
   ros::Rate loop_rate(10);
 
-  while (calc_movement() > 0.5) {
+  while (calc_movement() > 0.8) {
     //std::cout << "calc_movement(): " << calc_movement() << "\n";
     twist.linear.x = 0;
-    twist.angular.z = 0.2 * calc_movement() * rotateDirection;
+    twist.angular.z = calc_movement() * rotateDirection;
     pub_movement.publish(twist);
     ros::spinOnce();
     loop_rate.sleep();
@@ -143,15 +140,15 @@ void MoveBase::rotate(geometry_msgs::Twist &twist)
 
 void MoveBase::move(geometry_msgs::Twist &twist)
 {
-  twist.angular.z = 0.2 * calc_movement() * rotateDirection;
+  twist.angular.z = calc_movement() * rotateDirection;
   twist.linear.x = 0.1 * speed * moveDirection;
   pub_movement.publish(twist);
 }
 
 float MoveBase::calc_movement()
 {
-  int theta_x = MapThread::path[MapThread::path.size()-steps].second - this->roboter_pos.second;
-  int theta_y = MapThread::path[MapThread::path.size()-steps].first - this->roboter_pos.first;
+  int theta_x = path[path.size()-steps].second - roboter_pos.second;
+  int theta_y = path[path.size()-steps].first - roboter_pos.first;
   float angle = atan2((double) theta_y, (double) theta_x);
   float theta = current_pose.theta;
   float PI = 3.1416;
@@ -237,9 +234,9 @@ float MoveBase::calc_movement()
 
 void MoveBase::find_nearst_pos() {
 
-  while (calc_distance(MapThread::path[MapThread::path.size()-1], roboter_pos)
-         > calc_distance(MapThread::path[MapThread::path.size()-2], roboter_pos)) {
-    MapThread::path.pop_back();
+  while (calc_distance(path[path.size()-1], roboter_pos)
+         > calc_distance(path[path.size()-2], roboter_pos)) {
+    path.pop_back();
   }
 
 }
@@ -250,21 +247,21 @@ int MoveBase::calc_distance(std::pair<int, int> point1, std::pair<int, int> poin
 }
 
 void MoveBase::calc_coordiante_map(std::pair<int, int> &pixel, CoPair &coordinate) {
-  int origin_x = MapThread::COL / 2;
-  int origin_y = MapThread::ROW / 2;
+  int origin_x = COL / 2;
+  int origin_y = ROW / 2;
 
-  double x = ((double) (pixel.second - origin_x)) * MapThread::mapResolution;
-  double y = ((double) (pixel.first - origin_y)) * MapThread::mapResolution;
+  double x = ((double) (pixel.second - origin_x)) * mapResolution;
+  double y = ((double) (pixel.first - origin_y)) * mapResolution;
   coordinate.first = x;
   coordinate.second = y;
 }
 
 void MoveBase::calc_coordinate_matrix(double x, double y, std::pair<int, int> &pixel) {
-  int origin_x = MapThread::COL / 2;
-  int origin_y = MapThread::ROW / 2;
+  int origin_x = COL / 2;
+  int origin_y = ROW / 2;
 
-  int i = origin_x + (int) (x / MapThread::mapResolution);
-  int j = origin_y + (int) (y / MapThread::mapResolution);
+  int i = origin_x + (int) (x / mapResolution);
+  int j = origin_y + (int) (y / mapResolution);
 
   pixel.second = i;
   pixel.first = j;

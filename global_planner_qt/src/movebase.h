@@ -21,12 +21,12 @@ class MoveBase
     ANTICLOCKWISE = 1
   };
   enum SPEED_MPS {
-    SLOW = 2,
-    FAST = 4
+    SLOW = 3,
+    FAST = 5
   };
   enum STEPS {
-    SHORT = 3,
-    LONG = 10
+    SHORT = 6,
+    LONG = 20
   };
 private:
   ros::NodeHandle nh;
@@ -40,11 +40,8 @@ private:
   STEPS steps;
 
 public:
-  static std::pair<int, int> roboter_pos;
-  static std::pair<int, int> goal;
-  static std::vector<std::vector<int> > roboter_local_field;
   const static double MIN_SCAN_ANGLE_RAD = 30.0 / 180.0 * M_PI;
-  const static float MIN_PROXIMITY_RANGE_M = 0.3;
+  const static float MIN_PROXIMITY_RANGE_M = 0.5;
 
 public:
   MoveBase();
