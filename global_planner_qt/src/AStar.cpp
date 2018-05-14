@@ -6,6 +6,7 @@
  */
 
 #include "AStar.h"
+#include "param.h"
 
 namespace global_planner {
 
@@ -68,7 +69,7 @@ void AStar::tracePath(cell** cellDetails, const Pair &dest, std::vector<Pair> &p
     plan.push_back(std::make_pair (row, col));
 }
 
-void AStar::aStarSearch(const std::vector<std::vector<int> > &grid, const Pair &start, const Pair &dest, std::vector<Pair> &plan)
+bool AStar::aStarSearch(const std::vector<std::vector<int> > &grid, const Pair &start, const Pair &dest, std::vector<Pair> &plan)
 {
 	int ROW = grid.size();
 	int COL = grid[0].size();
@@ -77,14 +78,14 @@ void AStar::aStarSearch(const std::vector<std::vector<int> > &grid, const Pair &
     if (isValid (dest.first, dest.second, ROW, COL) == false)
     {
         printf ("Destination is invalid\n");
-        return;
+        return false;
     }
 
     // Either the source or the destination is blocked
     if (isUnBlocked(grid, dest.first, dest.second) == false)
     {
         printf ("the destination is blocked\n");
-        return;
+        return false;
     }
     /**
     if (isUnBlocked(grid, start.first, start.second) == false)
@@ -97,7 +98,7 @@ void AStar::aStarSearch(const std::vector<std::vector<int> > &grid, const Pair &
     if (isDestination(start.first, start.second, dest) == true)
     {
         printf ("We are already at the destination\n");
-        return;
+        return false;
     }
 
     // Create a closed list and initialise it to false which means
@@ -176,7 +177,7 @@ void AStar::aStarSearch(const std::vector<std::vector<int> > &grid, const Pair &
                 printf ("The destination cell is found\n");
                 tracePath (cellDetails, dest, plan);
                 foundDest = true;
-                return;
+                return true;
             }
             // If the successor is already on the closed
             // list or if it is blocked, then ignore it.
@@ -226,7 +227,7 @@ void AStar::aStarSearch(const std::vector<std::vector<int> > &grid, const Pair &
                 printf("The destination cell is found\n");
                 tracePath(cellDetails, dest, plan);
                 foundDest = true;
-                return;
+                return true;
             }
             // If the successor is already on the closed
             // list or if it is blocked, then ignore it.
@@ -267,7 +268,7 @@ void AStar::aStarSearch(const std::vector<std::vector<int> > &grid, const Pair &
                 printf("The destination cell is found\n");
                 tracePath(cellDetails, dest, plan);
                 foundDest = true;
-                return;
+                return true;
             }
 
             // If the successor is already on the closed
@@ -310,7 +311,7 @@ void AStar::aStarSearch(const std::vector<std::vector<int> > &grid, const Pair &
                 printf("The destination cell is found\n");
                 tracePath(cellDetails, dest, plan);
                 foundDest = true;
-                return;
+                return true;
             }
 
             // If the successor is already on the closed
@@ -353,7 +354,7 @@ void AStar::aStarSearch(const std::vector<std::vector<int> > &grid, const Pair &
                 printf ("The destination cell is found\n");
                 tracePath (cellDetails, dest, plan);
                 foundDest = true;
-                return;
+                return true;
             }
 
             // If the successor is already on the closed
@@ -396,7 +397,7 @@ void AStar::aStarSearch(const std::vector<std::vector<int> > &grid, const Pair &
                 printf ("The destination cell is found\n");
                 tracePath (cellDetails, dest, plan);
                 foundDest = true;
-                return;
+                return true;
             }
 
             // If the successor is already on the closed
@@ -438,7 +439,7 @@ void AStar::aStarSearch(const std::vector<std::vector<int> > &grid, const Pair &
                 printf ("The destination cell is found\n");
                 tracePath (cellDetails, dest, plan);
                 foundDest = true;
-                return;
+                return true;
             }
 
             // If the successor is already on the closed
@@ -481,7 +482,7 @@ void AStar::aStarSearch(const std::vector<std::vector<int> > &grid, const Pair &
                 printf("The destination cell is found\n");
                 tracePath(cellDetails, dest, plan);
                 foundDest = true;
-                return;
+                return true;
             }
 
             // If the successor is already on the closed
@@ -514,10 +515,11 @@ void AStar::aStarSearch(const std::vector<std::vector<int> > &grid, const Pair &
     // list is empty, then we conclude that we failed to
     // reach the destiantion cell. This may happen when the
     // there is no way to destination cell (due to blockages)
-    if (foundDest == false)
+    if (foundDest == false) {
         printf("Failed to find the Destination Cell\n");
-
-    return;
+        return false;
+    }
+    return true;
 }
 
 } /* namespace global_planner */

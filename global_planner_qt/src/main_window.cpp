@@ -17,6 +17,7 @@
 #include <QImage>
 #include <QRgb>
 #include <QTimer>
+#include <QMessageBox>
 #include "param.h"
 
 /*****************************************************************************
@@ -53,7 +54,7 @@ MainWindow::MainWindow(QWidget *parent)  : QMainWindow(parent), ui(new Ui::MainW
   connect(ui->start, SIGNAL(clicked(bool)), this, SLOT(start_simulation()));
   timer = new QTimer;
   timer->setInterval(10);
-  connect(timer, SIGNAL(timeout()), this, SLOT(update_roboter_pos()));
+  connect(timer, SIGNAL(timeout()), this, SLOT(update_window()));
   timer->start();
 }
 
@@ -106,10 +107,8 @@ void MainWindow::drawPath()
   }
 }
 
-void MainWindow::update_roboter_pos()
+void MainWindow::draw_roboter_pos()
 {
-  drawMap();    // update map
-  drawPath();   // update path
   QRgb value = qRgb(255, 255, 255);   // white for delete
   // delete old position of roboter
   int rows = roboter_local_field.size();
@@ -130,7 +129,27 @@ void MainWindow::update_roboter_pos()
       image.setPixel(QPoint(roboter_pos_gui.second+i, roboter_pos_gui.first+j), value);
     }
   }
+}
+
+void MainWindow::update_window()
+{
+  QMessageBox msgBox;
+  drawMap();    // update map
+  drawPath();   // update path
+  draw_roboter_pos();   // update roboter position
+
   ui->label->setPixmap(QPixmap::fromImage(image));
+  if (is_job_finished) {
+    timer->stop();
+
+    msgBox.setText("the job is finished");
+    msgBox.exec();
+  }
+  if (!is_dest_reachable) {
+    msgBox.setText("the destination is unreachable!!!");
+    msgBox.exec();
+    timer->stop();
+  }
 }
 
 void MainWindow::quit_simulation()

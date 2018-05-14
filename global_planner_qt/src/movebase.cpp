@@ -16,15 +16,15 @@ MoveBase::MoveBase()
 
 void MoveBase::init() {
   // Waiting bis roboter_pos position initialized
-  std::cout << "wait roboter position initialization \n";
+  std::cout << "Waiting for roboter position initialized ...\n";
   while (!is_roboter_pos_init) {
     ros::spinOnce();
   }
+  std::cout << "Roboter position is initialized ...\n";
 
-  // Set Goal manuel
-  //CoPair GOAL = std::make_pair(1.6, 1.6);
-  //goal = std::make_pair(160, 62);
-  calc_coordinate_matrix(1.6, 1.6, goal);
+  calc_coordinate_matrix(-2.6, -2.3, curr_goal);
+  goals.push_back(curr_goal);
+  calc_coordinate_matrix(1.6, 1.6, curr_goal);
 
   // Init roboter local field
   int roboter_length =  8;
@@ -38,7 +38,7 @@ void MoveBase::excutePlan() {
   geometry_msgs::Twist twist;
   ros::Rate loop_rate(10);
   while (ros::ok()) {
-    while (!quitSim) {
+    while (!quitSim && is_dest_reachable) {
       mutex.lock();     // lock, because path can be changed in MapThread
       find_nearst_pos();
       rotate(twist);
@@ -233,7 +233,17 @@ float MoveBase::calc_movement()
 }
 
 void MoveBase::find_nearst_pos() {
-
+  if (path.size() < 20) {
+    if (goals.empty() && !request_new_plan) {
+      is_job_finished = true;
+      quitSim = true;
+      return;
+    } else if (!goals.empty()) {
+      curr_goal = goals[goals.size() - 1];
+      goals.pop_back();
+      request_new_plan = true;
+    }
+  }
   while (calc_distance(path[path.size()-1], roboter_pos)
          > calc_distance(path[path.size()-2], roboter_pos)) {
     path.pop_back();

@@ -44,12 +44,12 @@ public:
 public:
   MainWindow(QWidget *parent = 0);
 	~MainWindow();
-  void drawMap();
-
 private:
   void drawPath();
-public Q_SLOTS:
-  void update_roboter_pos();
+  void drawMap();
+  void draw_roboter_pos();
+private Q_SLOTS:
+  void update_window();
   void quit_simulation();
   void start_simulation();
 private:

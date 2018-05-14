@@ -5,18 +5,9 @@
 
 
 namespace global_planner {
-/**
-std::vector<std::vector<int> > MapThread::gridMap;
-std::vector<std::pair<int, int> > MapThread::path;
-int MapThread::ROW;
-int MapThread::COL;
 
-double MapThread::mapResolution;
-*/
 MapThread::MapThread()
 {
-  isMapInit = false;
-  isPathInit = false;
   this->astar = new AStar;
   map_sub = nh.subscribe("/map", 1, &MapThread::updateMap, this);
   pub_vel = nh.advertise<geometry_msgs::Twist>("/cmd_vel", 1);
@@ -30,7 +21,8 @@ MapThread::~MapThread()
 
 void MapThread::initMap()
 {
-  while (!isMapInit) {
+  ROS_INFO("Waiting for Initialzation of Map ...");
+  while (!is_map_init) {
     ros::spinOnce();
   }
   ROS_INFO("map is initialized ...");
@@ -38,14 +30,14 @@ void MapThread::initMap()
 
 void MapThread::run()
 {
-  ros::Rate loop_rate(10);
-  while (!isMapInit) {
-    ROS_INFO("Waiting for Initialzation of Map ...");
-    ros::spinOnce();
-    loop_rate.sleep();
+  ROS_INFO("Waiting path to initialize ...");
+  if (makePlan()) {
+    ROS_INFO("Path is initialized");
+    is_path_init = true;
+  } else {
+    is_dest_reachable = false;
+    ROS_ERROR("Destination is unreachable!!!");
   }
-  makePlan();
-  isPathInit = true;
   updateAll();
 }
 
@@ -56,21 +48,25 @@ void MapThread::updateAll()
     ros::spinOnce();
     calc_costMap();
 
-    if (isPathBlocked()) {
-      makePlan();
+    if (isPathBlocked() || request_new_plan) {
+      if (makePlan()) {
+        ROS_INFO("new path is found");
+        request_new_plan = false;
+      }
     }
     loop_rate.sleep();
   }
 }
 
-void MapThread::makePlan()
+bool MapThread::makePlan()
 {
   mutex.lock();   // lock, because path is also in movebase.cpp used
   std::cout << "in makePlan(), has clock \n";
   pubZeroVel();   // stop roboter while recreate the path
-  this->astar->aStarSearch(gridMap, roboter_pos, goal, path);
+  bool res = this->astar->aStarSearch(gridMap, roboter_pos, curr_goal, path);
   mutex.unlock();
   std::cout << "in makePlan(), release clock \n";
+  return res;
 }
 
 bool MapThread::isPathBlocked()
@@ -89,7 +85,7 @@ bool MapThread::isPathBlocked()
 
 void MapThread::calc_costMap()
 {
-  int costMapRange = 10;
+  int costMapRange = 15;
   //std::cout << "int calc_costMap() \n";
   for (int i = costMapRange; i < ROW-costMapRange; i++) {
     for (int j = costMapRange; j < COL-costMapRange; j++) {
@@ -114,12 +110,12 @@ void MapThread::updateMap(const nav_msgs::OccupancyGridConstPtr map)
   COL = map->info.width;
   mapResolution = map->info.resolution;
   // Init gridMap, if first get map
-  if (!isMapInit) {
+  if (!is_map_init) {
     gridMap.resize(ROW);
     for (int i = 0; i < ROW; i++) {
       gridMap[i].resize(COL);
     }
-    isMapInit = true;
+    is_map_init = true;
   }
 
   int curCell = 0;

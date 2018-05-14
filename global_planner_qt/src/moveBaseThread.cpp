@@ -1,17 +1,17 @@
-#include "gui_thread.h"
+#include "moveBaseThread.h"
 #include "movebase.h"
 
 namespace global_planner {
-GUI_Thread::GUI_Thread()
+MoveBaseThread::MoveBaseThread()
 {
   move_base = new MoveBase;
 }
 
-GUI_Thread::~GUI_Thread(){
+MoveBaseThread::~MoveBaseThread(){
   delete move_base;
 }
 
-void GUI_Thread::run()
+void MoveBaseThread::run()
 {
   move_base->excutePlan();
 }
