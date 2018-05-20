@@ -5,8 +5,8 @@
  *      Author: yashuai
  */
 
-#include "AStar.h"
-#include "param.h"
+#include "../include/global_planner_qt/AStar.h"
+#include "../include/global_planner_qt/param.h"
 
 namespace global_planner {
 

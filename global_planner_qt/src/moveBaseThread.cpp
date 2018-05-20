@@ -1,5 +1,5 @@
-#include "moveBaseThread.h"
-#include "movebase.h"
+#include "../include/global_planner_qt/moveBaseThread.h"
+#include "../include/global_planner_qt/movebase.h"
 
 namespace global_planner {
 MoveBaseThread::MoveBaseThread()
@@ -13,7 +13,7 @@ MoveBaseThread::~MoveBaseThread(){
 
 void MoveBaseThread::run()
 {
-  move_base->excutePlan();
+  move_base->start();
 }
 
 }   // namespace global_planner

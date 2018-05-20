@@ -1,5 +1,6 @@
-#include "movebase.h"
-#include "param.h"
+#include "../include/global_planner_qt/movebase.h"
+#include "../include/global_planner_qt/grab.h"
+#include "../include/global_planner_qt/param.h"
 
 namespace global_planner {
 MoveBase::MoveBase()
@@ -7,11 +8,24 @@ MoveBase::MoveBase()
   sub_odom = nh.subscribe("/odom", 1, &MoveBase::odom_callback, this);
   sub_laser = nh.subscribe("/scan", 1, &MoveBase::scan_callback, this);
   pub_movement = nh.advertise<geometry_msgs::Twist>("cmd_vel", 1);
+  /**
+  sub_resource = nh.subscribe("/roboter/resource", 10, &MoveBase::resource_callback, this);
+  sub_resource_position = nh.subscribe("/gazebo/model_states", 10, &MoveBase::resource_pose_Callback, this);
+  
+  publisher = nh.advertise<gazebo_msgs::ModelState>("/gazebo/set_model_state", 1);
+  sub = nh.subscribe("/gazebo/link_states", 1, &MoveBase::pose_Callback, this);
+  */
   moveDirection = FORWARD;
   rotateDirection = CLOCKWISE;
   speed = SLOW;
-  steps = SHORT;
-  init();
+  steps = LONG;
+  /**
+  sub_counter = 0;
+  current_publish_id = 0;
+  found_ressources = false;
+  resources_in_simulation = 3;
+  */
+  //init();
 }
 
 void MoveBase::init() {
@@ -22,9 +36,14 @@ void MoveBase::init() {
   }
   std::cout << "Roboter position is initialized ...\n";
 
-  calc_coordinate_matrix(-2.6, -2.3, curr_goal);
+  //calc_coordinate_matrix(-2.6, -2.3, curr_goal.goal_pos);
+  //curr_goal.yaw = -1.57075;
+  //goals.push_back(curr_goal);
+  calc_coordinate_matrix(1.6, 1.6, curr_goal.goal_pos);
+  curr_goal.yaw = 0.785;
   goals.push_back(curr_goal);
-  calc_coordinate_matrix(1.6, 1.6, curr_goal);
+  calc_coordinate_matrix(-2.6, -2.6, curr_goal.goal_pos);
+  curr_goal.yaw = -1.57075;
 
   // Init roboter local field
   int roboter_length =  8;
@@ -34,25 +53,37 @@ void MoveBase::init() {
   }
 }
 
+void MoveBase::start()
+{
+  while (!is_map_init) {
+    sleep(1);
+  }
+  init();
+  is_goal_ready = true;
+  while (!is_path_init) {
+    sleep(1);
+  }
+  excutePlan();
+}
+
 void MoveBase::excutePlan() {
   geometry_msgs::Twist twist;
   ros::Rate loop_rate(10);
   while (ros::ok()) {
-    while (!quitSim && is_dest_reachable) {
-      mutex.lock();     // lock, because path can be changed in MapThread
-      find_nearst_pos();
-      rotate(twist);
-      move(twist);
-      ros::spinOnce();
-      mutex.unlock();
-      loop_rate.sleep();
+    while (!stopSim && is_dest_reachable) {
+      if (!reach_goal(twist)) {
+        mutex.lock();     // lock, because path can be changed in MapThread
+        find_nearst_pos();
+        rotate(twist);
+        move(twist);
+        ros::spinOnce();
+        mutex.unlock();
+        loop_rate.sleep();
+      }
     }
     // Wait for starting ...
     mutex.lock();
-    twist.angular.z = 0;
-    twist.linear.x = 0;
-    pub_movement.publish(twist);
-    ros::spinOnce();
+    pubZeroVel(twist);
     condition.wait(&mutex);
     mutex.unlock();
   }
@@ -122,14 +153,12 @@ void MoveBase::scan_callback(const sensor_msgs::LaserScan::ConstPtr& msg)
   */
 }
 
-
-
 void MoveBase::rotate(geometry_msgs::Twist &twist)
 {
   ros::Rate loop_rate(10);
 
   while (calc_movement() > 0.8) {
-    //std::cout << "calc_movement(): " << calc_movement() << "\n";
+    std::cout << "calc_movement(): " << calc_movement() << "\n";
     twist.linear.x = 0;
     twist.angular.z = calc_movement() * rotateDirection;
     pub_movement.publish(twist);
@@ -143,6 +172,98 @@ void MoveBase::move(geometry_msgs::Twist &twist)
   twist.angular.z = calc_movement() * rotateDirection;
   twist.linear.x = 0.1 * speed * moveDirection;
   pub_movement.publish(twist);
+}
+
+void MoveBase::rotate_to_goal(geometry_msgs::Twist &twist)
+{
+  ros::Rate loop_rate(10);
+  double goal_yaw = curr_goal.yaw;
+  double roboter_direction = current_pose.theta;
+  if (goal_yaw < 0) { goal_yaw += 6.28; }
+  if (roboter_direction < 0) { roboter_direction += 6.28; }
+  while(abs(goal_yaw - roboter_direction) > 0.5) {
+    twist.linear.x = 0;
+    twist.angular.z = 0.5 * (goal_yaw - roboter_direction);
+    pub_movement.publish(twist);
+    ros::spinOnce();
+    loop_rate.sleep();
+    roboter_direction = current_pose.theta;
+    if (roboter_direction < 0) { roboter_direction += 6.28; }
+  }
+  pubZeroVel(twist);
+  // grab ressource
+  loop_rate.sleep();
+  /**
+  while(!grabbed) {
+    is_reach_goal = true;
+    ros::spinOnce();
+  }
+  */
+}
+
+bool MoveBase::reach_goal(geometry_msgs::Twist &twist)
+{
+  if (path.size() < 10) {
+    rotate_to_goal(twist);
+    if (goals.empty() && !request_new_plan) {
+      is_job_finished = true;
+      stopSim = true;
+      return true;
+    } else if (!goals.empty()) {
+      curr_goal = goals[goals.size() - 1];
+      goals.pop_back();
+      request_new_plan = true;
+    }
+    if (Grab::grabbed == false) {
+      Grab grab;
+      grab.grab_resource();
+    }
+    sleep(5);
+    return true;
+  }
+  return false;
+}
+
+void MoveBase::pubZeroVel(geometry_msgs::Twist &twist)
+{
+  twist.angular.z = 0;
+  twist.linear.x = 0;
+  pub_movement.publish(twist);
+  ros::spinOnce();
+}
+
+void MoveBase::find_nearst_pos() {
+  while (calc_distance(path[path.size()-1], roboter_pos)
+         > calc_distance(path[path.size()-2], roboter_pos)) {
+    path.pop_back();
+  }
+
+}
+
+int MoveBase::calc_distance(std::pair<int, int> point1, std::pair<int, int> point2) {
+  return signur(point1.first - point2.first) * (point1.first - point2.first) +
+         signur(point1.second - point2.second) * (point1.second - point2.second);
+}
+
+void MoveBase::calc_coordinate_map(std::pair<int, int> &pixel, CoPair &coordinate) {
+  int origin_x = COL / 2;
+  int origin_y = ROW / 2;
+
+  double x = ((double) (pixel.second - origin_x)) * mapResolution;
+  double y = ((double) (pixel.first - origin_y)) * mapResolution;
+  coordinate.first = x;
+  coordinate.second = y;
+}
+
+void MoveBase::calc_coordinate_matrix(double x, double y, std::pair<int, int> &pixel) {
+  int origin_x = COL / 2;
+  int origin_y = ROW / 2;
+
+  int i = origin_x + (int) (x / mapResolution);
+  int j = origin_y + (int) (y / mapResolution);
+
+  pixel.second = i;
+  pixel.first = j;
 }
 
 float MoveBase::calc_movement()
@@ -188,7 +309,7 @@ float MoveBase::calc_movement()
     } else {
       rotateDirection = CLOCKWISE;
       moveDirection = FORWARD;
-      if (theta < 0) { return 2*PI + theta - -angle; }
+      if (theta < 0) { return 2*PI + theta - angle; }
       else { return theta - angle; }
     }
   } else if (angle >= -(PI / 2) && angle < 0) {
@@ -232,51 +353,99 @@ float MoveBase::calc_movement()
   }
 }
 
-void MoveBase::find_nearst_pos() {
-  if (path.size() < 20) {
-    if (goals.empty() && !request_new_plan) {
-      is_job_finished = true;
-      quitSim = true;
-      return;
-    } else if (!goals.empty()) {
-      curr_goal = goals[goals.size() - 1];
-      goals.pop_back();
-      request_new_plan = true;
+/**
+void MoveBase::pose_Callback(const gazebo_msgs::LinkStates::ConstPtr &msg)
+{
+    if (is_reach_goal && !grabbed)
+    {
+        int i = 0;
+        while (msg->name[i] != "turtlebot3_burger::gripper_link")
+        {
+          i++;
+          std::cout << "i: " << i << std::endl;
+        }
+
+        //for(int j = 0; j < resources_in_simulation; j++)
+        //{
+            //resources[j].distance = sqrt(pow(msg->pose[i].position.x - resources[j].x, 2) + pow(msg->pose[i].position.y - resources[j].y, 2));
+        int j = 1;
+            if (!grabbed)
+            {
+                current_publish_id++;
+
+                gazebo_msgs::ModelState modelstate;
+                modelstate.model_name = (std::string) resources[j].name;
+                modelstate.pose.position.x = msg->pose[i].position.x;
+                modelstate.pose.position.y = msg->pose[i].position.y;
+                modelstate.pose.position.z = 0.03;
+                modelstate.reference_frame = (std::string) "world";
+
+                ros::Publisher publish_machine = nh.advertise<global_planner_qt::got_resource>("/roboter/resource", 100);
+                global_planner_qt::got_resource resource_msg;
+                resource_msg.got_r = true;
+                resource_msg.resource_name = "WHITE";
+                resource_msg.id = current_publish_id;
+                resource_msg.object_name = resources[j].name;
+
+                float time = 0;
+                while(time < 0.5)
+                {
+                    publish_machine.publish(resource_msg);
+                    publisher.publish(modelstate);
+                    ros::Duration(0.05).sleep();
+                    time += 0.05;
+                }
+
+                current_resource = msg->name[i];
+                ROS_ERROR("%s", current_resource.c_str());
+                grabbed = true;
+            }
+        //}
     }
-  }
-  while (calc_distance(path[path.size()-1], roboter_pos)
-         > calc_distance(path[path.size()-2], roboter_pos)) {
-    path.pop_back();
-  }
+}
+*/
+/**
+void MoveBase::resource_pose_Callback(const gazebo_msgs::ModelStates::ConstPtr& msg)
+{ 
+    if(!found_ressources)
+    {
+        //Subscriber
+        int i = 0;
+        int found_obj = 1;
+        while(found_obj < 4)
+        {
+            std::ostringstream convert;
+            std::string resource_name = std::string("Resource_White_");
 
+            convert << (found_obj);
+            resource_name += convert.str();
+
+            if(msg->name[i] == resource_name)
+            {
+                resources[found_obj - 1].x = msg->pose[i].position.x;
+                resources[found_obj - 1].y = msg->pose[i].position.y;
+                resources[found_obj - 1].name = msg->name[i];
+                found_obj++;
+            }
+            i++;
+        }
+        
+        found_ressources = true;
+    }
 }
 
-int MoveBase::calc_distance(std::pair<int, int> point1, std::pair<int, int> point2) {
-  return signur(point1.first - point2.first) * (point1.first - point2.first) +
-         signur(point1.second - point2.second) * (point1.second - point2.second);
+void MoveBase::resource_callback(const global_planner_qt::got_resource::ConstPtr& msg)
+{
+    if(sub_counter != msg->id)
+    {
+        current_resource = msg->resource_name;
+        grabbed = msg->got_r; 
+        sub_counter = msg->id;
+        resources_in_simulation--;
+    }
+    
 }
-
-void MoveBase::calc_coordiante_map(std::pair<int, int> &pixel, CoPair &coordinate) {
-  int origin_x = COL / 2;
-  int origin_y = ROW / 2;
-
-  double x = ((double) (pixel.second - origin_x)) * mapResolution;
-  double y = ((double) (pixel.first - origin_y)) * mapResolution;
-  coordinate.first = x;
-  coordinate.second = y;
-}
-
-void MoveBase::calc_coordinate_matrix(double x, double y, std::pair<int, int> &pixel) {
-  int origin_x = COL / 2;
-  int origin_y = ROW / 2;
-
-  int i = origin_x + (int) (x / mapResolution);
-  int j = origin_y + (int) (y / mapResolution);
-
-  pixel.second = i;
-  pixel.first = j;
-}
-
+*/
 } // namespace global_planner
 
 

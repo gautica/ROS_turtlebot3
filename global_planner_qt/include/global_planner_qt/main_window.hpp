@@ -19,12 +19,8 @@
 /*****************************************************************************
 ** Namespace
 *****************************************************************************/
-class QScrollArea;
-class QLabel;
-class QTimer;
-
+class QProcess;
 namespace global_planner {
-
 /*****************************************************************************
 ** Interface [MainWindow]
 *****************************************************************************/
@@ -33,27 +29,19 @@ namespace global_planner {
  */
 class MainWindow : public QMainWindow {
 Q_OBJECT
-public:
-  QScrollArea *scrollArea;
-  QLabel* label;
-  QImage image;
-  QTimer* timer;
-
-  std::pair<int, int> roboter_pos_gui;
 
 public:
   MainWindow(QWidget *parent = 0);
-	~MainWindow();
-private:
-  void drawPath();
-  void drawMap();
-  void draw_roboter_pos();
+  ~MainWindow();
 private Q_SLOTS:
-  void update_window();
-  void quit_simulation();
+  void stop_simulation();
   void start_simulation();
+  void open_MapViewer();
+  void open_simulation();
+  void quit_simulation();
 private:
   Ui::MainWindow *ui;
+  QProcess *processSim;
 };
 
 }  // namespace global_planner_qt
