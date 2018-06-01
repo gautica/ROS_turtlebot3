@@ -1,104 +1,110 @@
 #include "../include/global_planner_qt/grab.h"
 #include "../include/global_planner_qt/param.h"
+#include "gazebo_msgs/ModelState.h"
+#include <stdlib.h>
+#include <iostream>
 
 namespace global_planner {
 
-bool Grab::grabbed = false;
-
-Grab::Grab()
+Grab::Grab() : Resource()
 {
   publisher = nh.advertise<gazebo_msgs::ModelState>("/gazebo/set_model_state", 1);
   sub = nh.subscribe("/gazebo/link_states", 1, &Grab::pose_Callback, this);
-
-  sub_resource = nh.subscribe("/roboter/resource", 10, &Grab::resource_callback, this);
   sub_resource_position = nh.subscribe("/gazebo/model_states", 10, &Grab::resource_pose_Callback, this);
-
-  sub_counter = 0;
-  current_publish_id = 0;
-  found_ressources = false;
-  resources_in_simulation = 3;
+  found_resources = false;
 }
 
 void Grab::pose_Callback(const gazebo_msgs::LinkStates::ConstPtr &msg)
 {
+    if(!found_resources)
+    {
+        return;
+    }
+    
     int i = 0;
+    int nearest_resource_index = 0;
+    
+    int resource_size = (int)resources.size();
+    double smallest_distance = std::numeric_limits<double>::infinity();
+    if(resource_size <= 0)
+    {
+        return;
+    }
+    
     while (msg->name[i] != "turtlebot3_burger::gripper_link")
     {
       i++;
       std::cout << "i: " << i << std::endl;
     }
-    ROS_ERROR("out of while ...");
-   //float distance = sqrt(pow(msg->pose[i].position.x - -2.6, 2) + pow(msg->pose[i].position.y - -2.8, 2));
-
-     if (!grabbed)
-      {
+    
+    for(int k = 0; k < resource_size; k++)
+    {
+        double temp_distance = sqrt( pow(msg->pose[i].position.x - resources[k].x, 2) + pow(msg->pose[i].position.y - resources[k].y, 2) );;
+        if(temp_distance < smallest_distance)
+        {
+            smallest_distance = temp_distance;
+            nearest_resource_index = k;
+        }
+    }
+    
+    if (!grabbed && found_resources)
+    {
         gazebo_msgs::ModelState modelstate;
-        modelstate.model_name = (std::string) "Resource_White_2";
+        modelstate.model_name = (std::string) resources.at(nearest_resource_index).name;
+        std::cout << "resources[j].name: " << resources.at(nearest_resource_index).name.c_str() << "\n";
         modelstate.pose.position.x = msg->pose[i].position.x;
         modelstate.pose.position.y = msg->pose[i].position.y;
         modelstate.pose.position.z = 0.03;
         modelstate.reference_frame = (std::string) "world";
 
-       float time = 0;
-       while(time < 0.3)
-       {
-          publisher.publish(modelstate);
-          ros::Duration(0.05).sleep();
-          time += 0.05;
-       }
-       grabbed = true;
-       ROS_ERROR("debug1");
-      }
+        float time = 0;
+        while(time < 0.5)
+        {
+            publisher.publish(modelstate);
+            ros::Duration(0.05).sleep();
+            time += 0.05;
+        }
 
+        current_resource = msg->name[i];
+        ROS_ERROR("Grab: %s", current_resource.c_str());
+        grabbed = true;
+    }   
 }
 
 void Grab::resource_pose_Callback(const gazebo_msgs::ModelStates::ConstPtr& msg)
 {
-    if(!found_ressources)
+    if (!found_resources)
     {
-        //Subscriber
-        int i = 0;
-        int found_obj = 1;
-        while(found_obj < 4)
+        resources.clear();
+        long unsigned int size = msg->name.size();
+        ROS_ERROR("%d", (int) size);
+
+        int i;
+        for(i = 0; i < (int) size; i++)
         {
-            std::ostringstream convert;
-            std::string resource_name = std::string("Resource_White_");
+            if(msg->name[i].find("Resource") != std::string::npos)
+            {       
+                Resource_t new_resource;
+                new_resource.name = msg->name[i];
+                new_resource.x = msg->pose[i].position.x;
+                new_resource.y = msg->pose[i].position.y;
 
-            convert << (found_obj);
-            resource_name += convert.str();
+                ROS_ERROR("%s", new_resource.name.c_str());
 
-            if(msg->name[i] == resource_name)
-            {
-                resources[found_obj - 1].x = msg->pose[i].position.x;
-                resources[found_obj - 1].y = msg->pose[i].position.y;
-                resources[found_obj - 1].name = msg->name[i];
-                found_obj++;
+                resources.push_back(new_resource);
             }
-            i++;
         }
-
-        found_ressources = true;
+        found_resources = true; 
     }
-}
-
-void Grab::resource_callback(const global_planner_qt::got_resource::ConstPtr& msg)
-{
-    if(sub_counter != msg->id)
-    {
-        current_resource = msg->resource_name;
-        grabbed = msg->got_r;
-        sub_counter = msg->id;
-        resources_in_simulation--;
-    }
-
 }
 
 void Grab::grab_resource()
 {
-  while (!grabbed) {
+  while(!grabbed) {
     ros::spinOnce();
   }
 }
+
 }
 
 

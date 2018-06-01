@@ -31,32 +31,28 @@ void MapThread::initMap()
 void MapThread::run()
 {
   initMap();
-  while (!is_goal_ready) {
+  while (!is_roboter_pos_init) {
     sleep(1);
-  }
-  ROS_INFO("Waiting path to initialize ...");
-  if (makePlan()) {
-    ROS_INFO("Path is initialized");
-    is_path_init = true;
-  } else {
-    is_dest_reachable = false;
-    ROS_ERROR("Destination is unreachable!!!");
   }
   updateAll();
 }
 
 void MapThread::updateAll()
 {
-  ros::Rate loop_rate(1);
+  ros::Rate loop_rate(10);
   while (ros::ok()) {
     ros::spinOnce();
     calc_costMap();
-
-    if (isPathBlocked() || request_new_plan) {
-      if (makePlan()) {
-        ROS_INFO("new path is found");
-        request_new_plan = false;
+    while (!is_job_finished && is_goal_ready) {
+      ros::spinOnce();
+      calc_costMap();
+      if (request_new_plan || isPathBlocked()) {
+        if (makePlan()) {
+          ROS_INFO("new path is found");
+          request_new_plan = false;
+        }
       }
+      loop_rate.sleep();
     }
     loop_rate.sleep();
   }
@@ -64,10 +60,37 @@ void MapThread::updateAll()
 
 bool MapThread::makePlan()
 {
+  int count = 1;
+  int row = roboter_pos.first;
+  int col = roboter_pos.second;
+  std::pair<int, int> start;
+  while (true) {
+    if (gridMap[row + count][col] == 0) {
+      start.first = row + count;
+      start.second = col;
+      break;
+    }
+    if (gridMap[row - count][col] == 0) {
+      start.first = row - count;
+      start.second = col;
+      break;
+    }
+    if (gridMap[row][col + count] == 0) {
+      start.first = row;
+      start.second = col + count;
+      break;
+    }
+    if (gridMap[row][col - count] == 0) {
+      start.first = row;
+      start.second = col - count;
+      break;
+    }
+    count++;
+  }
   mutex.lock();   // lock, because path is also in movebase.cpp used
   std::cout << "in makePlan(), has clock \n";
   pubZeroVel();   // stop roboter while recreate the path
-  bool res = this->astar->aStarSearch(gridMap, roboter_pos, curr_goal.goal_pos, path);
+  bool res = this->astar->aStarSearch(gridMap, start, curr_goal.goal_pos, path);
   mutex.unlock();
   std::cout << "in makePlan(), release clock \n";
   return res;
@@ -76,12 +99,14 @@ bool MapThread::makePlan()
 bool MapThread::isPathBlocked()
 {
   //std::cout << "in isPathBlocked() \n";
-  for (int i = 0; i < path.size(); i++) {
-    if (gridMap[path[i].first][path[i].second] != 0 &&
-        gridMap[path[i].first][path[i].second] != -1) {
+  int count = path.size() - 1;
+  while (count > curr_goal.distance_precision) {
+    if (gridMap[path[count].first][path[count].second] != 0 &&
+        gridMap[path[count].first][path[count].second] != -1) {
     //  std::cout << "in isPathBlocked()  return true\n";
       return true;
     }
+    count--;
   }
   //std::cout << "in isPathBlocked() return false\n";
   return false;
@@ -89,13 +114,13 @@ bool MapThread::isPathBlocked()
 
 void MapThread::calc_costMap()
 {
-  int costMapRange = 15;
+  int costMapRange = 19;
 
   int roboter_row = roboter_pos.first;
   int roboter_col = roboter_pos.second;
-  for (int row = roboter_row - 150; row < roboter_row + 150; row++) {
-    for (int col = roboter_col - 150; col < roboter_col + 150; col++) {
-      if (gridMap[row][col] > 0 && gridMap[row][col] <= 100) {   // Block
+  for (int row = roboter_row - costMap_area; row < roboter_row + costMap_area; row++) {
+    for (int col = roboter_col - costMap_area; col < roboter_col + costMap_area; col++) {
+      if (gridMap[row][col] >= 50 && gridMap[row][col] <= 100) {   // Block
         for (int n = -costMapRange; n <= costMapRange; n++) {
           for (int m = -costMapRange; m <= costMapRange; m++) {
             if (gridMap[row+n][col+m] != 100 && gridMap[row+n][col+m] != 110) {
@@ -106,21 +131,6 @@ void MapThread::calc_costMap()
       }
     }
   }
-  /**
-  for (int i = costMapRange; i < ROW-costMapRange; i++) {
-    for (int j = costMapRange; j < COL-costMapRange; j++) {
-      if (gridMap[i][j] == 100) {   // Block
-        for (int n = -costMapRange; n <= costMapRange; n++) {
-          for (int m = -costMapRange; m <= costMapRange; m++) {
-            if (gridMap[i+n][j+m] != 100 && gridMap[i+n][j+m] != 110) {
-              gridMap[i+n][j+m] = 110;    // 110 indicate costmap
-            }
-          }
-        }
-      }
-    }
-  }
-  */
 }
 
 void MapThread::updateMap(const nav_msgs::OccupancyGridConstPtr map)
@@ -142,10 +152,12 @@ void MapThread::updateMap(const nav_msgs::OccupancyGridConstPtr map)
   if (is_roboter_pos_init) {
     int roboter_row = roboter_pos.first;
     int roboter_col = roboter_pos.second;
-    for (int row = roboter_row - 150; row < roboter_row + 150; row++) {
-      for (int col = roboter_col - 150; col < roboter_col + 150; col++) {
+    for (int row = roboter_row - costMap_area; row < roboter_row + costMap_area; row++) {
+      for (int col = roboter_col - costMap_area; col < roboter_col + costMap_area; col++) {
         int curCell = COL * row + col;
-        gridMap[row][col] = map->data[curCell];
+        if (gridMap[row][col] == 0 || gridMap[row][col] == -1) {
+          gridMap[row][col] = map->data[curCell];
+        }
       }
     }
   } else {

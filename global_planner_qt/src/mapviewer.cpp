@@ -71,8 +71,8 @@ void MapViewer::drawMap()
   QRgb value;
   int roboter_row = roboter_pos.first;
   int roboter_col = roboter_pos.second;
-  for (int row = roboter_row - 150; row < roboter_row + 150; row++) {
-    for (int col = roboter_col - 150; col < roboter_col + 150; col++) {
+  for (int row = roboter_row - costMap_area; row < roboter_row + costMap_area; row++) {
+    for (int col = roboter_col - costMap_area; col < roboter_col + costMap_area; col++) {
       if (gridMap[row][col] == 0) {
         value = qRgb(255, 255, 255);  // white free
       } else if (gridMap[row][col] == -1) {

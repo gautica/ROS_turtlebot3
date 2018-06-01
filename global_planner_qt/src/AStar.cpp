@@ -29,10 +29,10 @@ bool AStar::isValid(int row, int col, int ROW, int COL)
 bool AStar::isUnBlocked(const std::vector<std::vector<int> > &grid, const int row, const int col)
 {
     // Returns true if the cell is not blocked else false
-    if (grid[row][col] == 0 || grid[row][col] == -1)
-        return true;
-    else
+    if (grid[row][col] == 100 || grid[row][col] == 110)
         return false;
+    else
+        return true;
 }
 
 bool AStar::isDestination(int row, int col, const Pair dest)
@@ -71,6 +71,7 @@ void AStar::tracePath(cell** cellDetails, const Pair &dest, std::vector<Pair> &p
 
 bool AStar::aStarSearch(const std::vector<std::vector<int> > &grid, const Pair &start, const Pair &dest, std::vector<Pair> &plan)
 {
+  ROS_ERROR("in astarSearch");
 	int ROW = grid.size();
 	int COL = grid[0].size();
 
@@ -80,20 +81,21 @@ bool AStar::aStarSearch(const std::vector<std::vector<int> > &grid, const Pair &
         printf ("Destination is invalid\n");
         return false;
     }
-
+    /**
     // Either the source or the destination is blocked
     if (isUnBlocked(grid, dest.first, dest.second) == false)
     {
         printf ("the destination is blocked\n");
         return false;
     }
-    /**
+
     if (isUnBlocked(grid, start.first, start.second) == false)
     {
       printf ("Source is blocked\n");
-      return;
+
+      return false;
     }
-*/
+    */
     // If the destination cell is the same as source cell
     if (isDestination(start.first, start.second, dest) == true)
     {

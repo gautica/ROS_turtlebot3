@@ -39,6 +39,25 @@ private Q_SLOTS:
   void open_MapViewer();
   void open_simulation();
   void quit_simulation();
+  void create_assignments();
+  void blue_product();
+  void rot_product();
+  void yellow_product();
+  void violet_product();
+  void orange_product();
+  void black_product();
+  void green_product();
+
+private:
+  void calc_coordinate_matrix(double x, double y, std::pair<int, int> &pixel);
+  int calc_distance(std::pair < int, int > &point1, std::pair < int, int > &point2);
+  bool find_resource(const std::string &str, std::pair<int, int> &resource_pos);
+  bool find_machine(int ID1, int ID2, std::pair<int, int> &machine_pos);
+  template<typename T>
+  int signur(T num) {
+    if (num < 0) return -1;
+    else return 1;
+  }
 private:
   Ui::MainWindow *ui;
   QProcess *processSim;
