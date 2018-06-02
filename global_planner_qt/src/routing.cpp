@@ -63,6 +63,7 @@ void Routing::create_blue_product()
 
   curr_goal = goals.front();
   goals.pop();
+
 }
 
 void Routing::create_yellow_product()

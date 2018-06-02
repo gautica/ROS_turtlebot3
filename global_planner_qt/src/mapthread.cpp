@@ -42,10 +42,10 @@ void MapThread::updateAll()
   ros::Rate loop_rate(10);
   while (ros::ok()) {
     ros::spinOnce();
-    calc_costMap();
+    //calc_costMap();
     while (!is_job_finished && is_goal_ready) {
       ros::spinOnce();
-      calc_costMap();
+      //calc_costMap();
       if (request_new_plan || isPathBlocked()) {
         if (makePlan()) {
           ROS_INFO("new path is found");
@@ -102,7 +102,8 @@ bool MapThread::isPathBlocked()
   int count = path.size() - 1;
   while (count > curr_goal.distance_precision) {
     if (gridMap[path[count].first][path[count].second] != 0 &&
-        gridMap[path[count].first][path[count].second] != -1) {
+        gridMap[path[count].first][path[count].second] != -1 &&
+        gridMap[path[count].first][path[count].second] != 120) {
     //  std::cout << "in isPathBlocked()  return true\n";
       return true;
     }
@@ -114,17 +115,25 @@ bool MapThread::isPathBlocked()
 
 void MapThread::calc_costMap()
 {
-  int costMapRange = 19;
+  int redRange = 16;
+  int orangeRange = 10;
 
   int roboter_row = roboter_pos.first;
   int roboter_col = roboter_pos.second;
   for (int row = roboter_row - costMap_area; row < roboter_row + costMap_area; row++) {
     for (int col = roboter_col - costMap_area; col < roboter_col + costMap_area; col++) {
       if (gridMap[row][col] >= 50 && gridMap[row][col] <= 100) {   // Block
-        for (int n = -costMapRange; n <= costMapRange; n++) {
-          for (int m = -costMapRange; m <= costMapRange; m++) {
+        for (int n = -redRange; n <= redRange; n++) {
+          for (int m = -redRange; m <= redRange; m++) {
             if (gridMap[row+n][col+m] != 100 && gridMap[row+n][col+m] != 110) {
-              gridMap[row+n][col+m] = 110;    // 110 indicate costmap
+              gridMap[row+n][col+m] = 110;    // 110 indicate red area
+            }
+          }
+        }
+        for (int n = -(redRange+orangeRange); n <= (redRange+orangeRange); n++) {
+          for (int m = -(redRange+orangeRange); m <= (redRange+orangeRange); m++) {
+            if (gridMap[row+n][col+m] != 100 && gridMap[row+n][col+m] != 110 && gridMap[row+n][col+m] != 120) {
+              gridMap[row+n][col+m] = 120;    // 120 indicate orange area
             }
           }
         }
@@ -155,11 +164,12 @@ void MapThread::updateMap(const nav_msgs::OccupancyGridConstPtr map)
     for (int row = roboter_row - costMap_area; row < roboter_row + costMap_area; row++) {
       for (int col = roboter_col - costMap_area; col < roboter_col + costMap_area; col++) {
         int curCell = COL * row + col;
-        if (gridMap[row][col] == 0 || gridMap[row][col] == -1) {
+        //if (gridMap[row][col] == 0 || gridMap[row][col] == -1) {
           gridMap[row][col] = map->data[curCell];
-        }
+        //}
       }
     }
+    calc_costMap();
   } else {
     int curCell = 0;
     for (int i = 0; i < ROW; i++) {

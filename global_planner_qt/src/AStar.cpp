@@ -43,11 +43,15 @@ bool AStar::isDestination(int row, int col, const Pair dest)
         return false;
 }
 
-double AStar::calculateHValue(int row, int col, const Pair &dest)
+double AStar::calculateHValue(const std::vector<std::vector<int> > &grid, int row, int col, const Pair &dest)
 {
     // Return using the distance formula
-    return ((double)sqrt ((row - dest.first)*(row - dest.first)
-                          + (col - dest.second)*(col - dest.second)));
+    double HValue = ((double)sqrt ((row - dest.first)*(row - dest.first)
+                                   + (col - dest.second)*(col - dest.second)));
+    if (grid[row][col] == 120) {
+      HValue += 50.0;
+    }
+    return HValue;
 }
 
 void AStar::tracePath(cell** cellDetails, const Pair &dest, std::vector<Pair> &plan)
@@ -81,14 +85,14 @@ bool AStar::aStarSearch(const std::vector<std::vector<int> > &grid, const Pair &
         printf ("Destination is invalid\n");
         return false;
     }
-    /**
+
     // Either the source or the destination is blocked
     if (isUnBlocked(grid, dest.first, dest.second) == false)
     {
         printf ("the destination is blocked\n");
         return false;
     }
-
+    /**
     if (isUnBlocked(grid, start.first, start.second) == false)
     {
       printf ("Source is blocked\n");
@@ -139,22 +143,25 @@ bool AStar::aStarSearch(const std::vector<std::vector<int> > &grid, const Pair &
     cellDetails[i][j].parent_i = i;
     cellDetails[i][j].parent_j = j;
 
-    std::vector<pPair> openList;
 
+    //std::vector<pPair> openList;
+    std::priority_queue<pPair, std::vector<pPair>, CompareDist > pq;
     // Put the starting cell on the open list and set its
     // 'f' as 0
-    openList.push_back(std::make_pair (0.0, std::make_pair (i, j)));
+    //pq.push(std::make_pair (0.0, std::make_pair (i, j)));
+    pq.push(std::make_pair (0.0, std::make_pair (i, j)));
 
     // We set this boolean value as false as initially
     // the destination is not reached.
     bool foundDest = false;
 
-    while (!openList.empty())
+    while (!pq.empty())
     {
-        pPair p = *openList.begin();
-
+        //pPair p = *openList.begin();
+        pPair p = pq.top();
+        pq.pop();
         // Remove this vertex from the open list
-        openList.erase(openList.begin());
+        //openList.erase(openList.begin());
 
         // Add this vertex to the open list
         i = p.second.first;
@@ -188,7 +195,7 @@ bool AStar::aStarSearch(const std::vector<std::vector<int> > &grid, const Pair &
                      isUnBlocked(grid, i-1, j) == true)
             {
                 gNew = cellDetails[i][j].g + 1.0;
-                hNew = calculateHValue (i-1, j, dest);
+                hNew = calculateHValue (grid, i-1, j, dest);
                 fNew = gNew + hNew;
 
                 // If it isn’t on the open list, add it to
@@ -202,7 +209,8 @@ bool AStar::aStarSearch(const std::vector<std::vector<int> > &grid, const Pair &
                 if (cellDetails[i-1][j].f == std::numeric_limits<float>::max() ||
                         cellDetails[i-1][j].f > fNew)
                 {
-                    openList.push_back(std::make_pair(fNew, std::make_pair(i-1, j)));
+
+                    pq.push(std::make_pair(fNew, std::make_pair(i-1, j)));
 
                     // Update the details of this cell
                     cellDetails[i-1][j].f = fNew;
@@ -238,13 +246,13 @@ bool AStar::aStarSearch(const std::vector<std::vector<int> > &grid, const Pair &
                      isUnBlocked(grid, i+1, j) == true)
             {
                 gNew = cellDetails[i][j].g + 1.0;
-                hNew = calculateHValue(i+1, j, dest);
+                hNew = calculateHValue(grid, i+1, j, dest);
                 fNew = gNew + hNew;
 
                 if (cellDetails[i+1][j].f == std::numeric_limits<float>::max() ||
                         cellDetails[i+1][j].f > fNew)
                 {
-                    openList.push_back(std::make_pair (fNew, std::make_pair (i+1, j)));
+                    pq.push(std::make_pair (fNew, std::make_pair (i+1, j)));
                     // Update the details of this cell
                     cellDetails[i+1][j].f = fNew;
                     cellDetails[i+1][j].g = gNew;
@@ -280,13 +288,13 @@ bool AStar::aStarSearch(const std::vector<std::vector<int> > &grid, const Pair &
                      isUnBlocked (grid, i, j+1) == true)
             {
                 gNew = cellDetails[i][j].g + 1.0;
-                hNew = calculateHValue (i, j+1, dest);
+                hNew = calculateHValue (grid, i, j+1, dest);
                 fNew = gNew + hNew;
 
                 if (cellDetails[i][j+1].f == std::numeric_limits<float>::max() ||
                         cellDetails[i][j+1].f > fNew)
                 {
-                    openList.push_back(std::make_pair(fNew, std::make_pair (i, j+1)));
+                    pq.push(std::make_pair(fNew, std::make_pair (i, j+1)));
 
                     // Update the details of this cell
                     cellDetails[i][j+1].f = fNew;
@@ -323,13 +331,13 @@ bool AStar::aStarSearch(const std::vector<std::vector<int> > &grid, const Pair &
                      isUnBlocked(grid, i, j-1) == true)
             {
                 gNew = cellDetails[i][j].g + 1.0;
-                hNew = calculateHValue(i, j-1, dest);
+                hNew = calculateHValue(grid, i, j-1, dest);
                 fNew = gNew + hNew;
 
                 if (cellDetails[i][j-1].f == std::numeric_limits<float>::max() ||
                         cellDetails[i][j-1].f > fNew)
                 {
-                    openList.push_back(std::make_pair (fNew, std::make_pair (i, j-1)));
+                    pq.push(std::make_pair (fNew, std::make_pair (i, j-1)));
 
                     // Update the details of this cell
                     cellDetails[i][j-1].f = fNew;
@@ -366,13 +374,13 @@ bool AStar::aStarSearch(const std::vector<std::vector<int> > &grid, const Pair &
                      isUnBlocked(grid, i-1, j+1) == true)
             {
                 gNew = cellDetails[i][j].g + 1.414;
-                hNew = calculateHValue(i-1, j+1, dest);
+                hNew = calculateHValue(grid, i-1, j+1, dest);
                 fNew = gNew + hNew;
 
                 if (cellDetails[i-1][j+1].f == std::numeric_limits<float>::max() ||
                         cellDetails[i-1][j+1].f > fNew)
                 {
-                    openList.push_back(std::make_pair (fNew, std::make_pair(i-1, j+1)));
+                    pq.push(std::make_pair (fNew, std::make_pair(i-1, j+1)));
 
                     // Update the details of this cell
                     cellDetails[i-1][j+1].f = fNew;
@@ -409,13 +417,13 @@ bool AStar::aStarSearch(const std::vector<std::vector<int> > &grid, const Pair &
                      isUnBlocked(grid, i-1, j-1) == true)
             {
                 gNew = cellDetails[i][j].g + 1.414;
-                hNew = calculateHValue(i-1, j-1, dest);
+                hNew = calculateHValue(grid, i-1, j-1, dest);
                 fNew = gNew + hNew;
 
                 if (cellDetails[i-1][j-1].f == std::numeric_limits<float>::max() ||
                         cellDetails[i-1][j-1].f > fNew)
                 {
-                    openList.push_back(std::make_pair (fNew, std::make_pair (i-1, j-1)));
+                    pq.push(std::make_pair (fNew, std::make_pair (i-1, j-1)));
                     // Update the details of this cell
                     cellDetails[i-1][j-1].f = fNew;
                     cellDetails[i-1][j-1].g = gNew;
@@ -451,13 +459,13 @@ bool AStar::aStarSearch(const std::vector<std::vector<int> > &grid, const Pair &
                      isUnBlocked(grid, i+1, j+1) == true)
             {
                 gNew = cellDetails[i][j].g + 1.414;
-                hNew = calculateHValue(i+1, j+1, dest);
+                hNew = calculateHValue(grid, i+1, j+1, dest);
                 fNew = gNew + hNew;
 
                 if (cellDetails[i+1][j+1].f == std::numeric_limits<float>::max() ||
                         cellDetails[i+1][j+1].f > fNew)
                 {
-                    openList.push_back(std::make_pair(fNew, std::make_pair (i+1, j+1)));
+                    pq.push(std::make_pair(fNew, std::make_pair (i+1, j+1)));
 
                     // Update the details of this cell
                     cellDetails[i+1][j+1].f = fNew;
@@ -494,13 +502,13 @@ bool AStar::aStarSearch(const std::vector<std::vector<int> > &grid, const Pair &
                      isUnBlocked(grid, i+1, j-1) == true)
             {
                 gNew = cellDetails[i][j].g + 1.414;
-                hNew = calculateHValue(i+1, j-1, dest);
+                hNew = calculateHValue(grid, i+1, j-1, dest);
                 fNew = gNew + hNew;
 
                 if (cellDetails[i+1][j-1].f == std::numeric_limits<float>::max() ||
                         cellDetails[i+1][j-1].f > fNew)
                 {
-                    openList.push_back(std::make_pair(fNew, std::make_pair(i+1, j-1)));
+                    pq.push(std::make_pair(fNew, std::make_pair(i+1, j-1)));
 
                     // Update the details of this cell
                     cellDetails[i+1][j-1].f = fNew;
