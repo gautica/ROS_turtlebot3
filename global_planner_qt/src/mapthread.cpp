@@ -65,22 +65,22 @@ bool MapThread::makePlan()
   int col = roboter_pos.second;
   std::pair<int, int> start;
   while (true) {
-    if (gridMap[row + count][col] == 0) {
+    if (gridMap[row + count][col] == 0 || gridMap[row + count][col] == 120) {
       start.first = row + count;
       start.second = col;
       break;
     }
-    if (gridMap[row - count][col] == 0) {
+    if (gridMap[row - count][col] == 0 || gridMap[row - count][col] == 120) {
       start.first = row - count;
       start.second = col;
       break;
     }
-    if (gridMap[row][col + count] == 0) {
+    if (gridMap[row][col + count] == 0 || gridMap[row][col + count] == 120) {
       start.first = row;
       start.second = col + count;
       break;
     }
-    if (gridMap[row][col - count] == 0) {
+    if (gridMap[row][col - count] == 0 || gridMap[row][col - count] == 120) {
       start.first = row;
       start.second = col - count;
       break;
@@ -101,9 +101,8 @@ bool MapThread::isPathBlocked()
   //std::cout << "in isPathBlocked() \n";
   int count = path.size() - 1;
   while (count > curr_goal.distance_precision) {
-    if (gridMap[path[count].first][path[count].second] != 0 &&
-        gridMap[path[count].first][path[count].second] != -1 &&
-        gridMap[path[count].first][path[count].second] != 120) {
+    if (gridMap[path[count].first][path[count].second] == 100 ||
+        gridMap[path[count].first][path[count].second] == 110) {
     //  std::cout << "in isPathBlocked()  return true\n";
       return true;
     }
@@ -116,8 +115,8 @@ bool MapThread::isPathBlocked()
 void MapThread::calc_costMap()
 {
   int redRange = 16;
-  int orangeRange = 10;
-
+  int orangeRange = 15;
+  int Upper = orangeRange * 5 + 120;
   int roboter_row = roboter_pos.first;
   int roboter_col = roboter_pos.second;
   for (int row = roboter_row - costMap_area; row < roboter_row + costMap_area; row++) {
@@ -130,6 +129,10 @@ void MapThread::calc_costMap()
             }
           }
         }
+        for (int i = 1; i <= orangeRange; i++) {
+          draw_costMap(row, col, i + redRange, Upper - i * 5);
+        }
+        /**
         for (int n = -(redRange+orangeRange); n <= (redRange+orangeRange); n++) {
           for (int m = -(redRange+orangeRange); m <= (redRange+orangeRange); m++) {
             if (gridMap[row+n][col+m] != 100 && gridMap[row+n][col+m] != 110 && gridMap[row+n][col+m] != 120) {
@@ -137,6 +140,7 @@ void MapThread::calc_costMap()
             }
           }
         }
+        */
       }
     }
   }
@@ -188,6 +192,51 @@ void MapThread::pubZeroVel()
   twist.linear.x = 0;
   pub_vel.publish(twist);
   ros::spinOnce();
+}
+
+void MapThread::draw_costMap(int row, int col, int n, int value)
+{
+  for (int i = col - n; i <= col + n; i++) {
+    if (gridMap[row-n][i] != 100 && gridMap[row-n][i] != 110) {
+      if (gridMap[row-n][i] >= 120) {   // 120 is lowest value for orange area
+        if (value > gridMap[row-n][i]) {
+          gridMap[row-n][i] = value;
+        }
+      } else {
+        gridMap[row-n][i] = value;    // 0 or -1
+      }
+    }
+    if (gridMap[row+n][i] != 100 && gridMap[row+n][i] != 110) {
+      if (gridMap[row+n][i] >= 120) {   // 120 is lowest value for orange area
+        if (value > gridMap[row+n][i]) {
+          gridMap[row+n][i] = value;
+        }
+      } else {
+        gridMap[row+n][i] = value;    // 0 or -1
+      }
+    }
+  }
+  for (int i = row - n; i <= row + n; i++) {
+    if (gridMap[i][col-n] != 100 && gridMap[i][col-n] != 110) {
+      if (gridMap[i][col-n] >= 120) {   // 120 is lowest value for orange area
+        if (value > gridMap[i][col-n]) {
+          gridMap[i][col-n] = value;
+        }
+      } else {
+        gridMap[i][col-n] = value;    // 0 or -1
+      }
+    }
+    if (gridMap[i][col+n] != 100 && gridMap[i][col+n] != 110) {
+      if (gridMap[i][col+n] >= 120) {   // 120 is lowest value for orange area
+        if (value > gridMap[i][col+n]) {
+          gridMap[i][col+n] = value;
+        }
+      } else {
+        gridMap[i][col+n] = value;    // 0 or -1
+      }
+    }
+  }
+
 }
 
 }   // namespace global_planner

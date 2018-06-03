@@ -27,7 +27,7 @@ class MoveBase
   };
   enum STEPS {
     SHORT = 5,
-    LONG = 20
+    LONG = 15
   };
 
 private:
@@ -44,8 +44,8 @@ private:
   bool isMoveable;
 
 public:
-  const static double MIN_SCAN_ANGLE_RAD = 30 / 180.0 * M_PI;
-  const static float MIN_PROXIMITY_RANGE_M = 0.2;
+  const static double MIN_SCAN_ANGLE_RAD = 22.5 / 180.0 * M_PI;
+  const static float MIN_PROXIMITY_RANGE_M = 0.25;
 
 public:
   MoveBase();

@@ -54,14 +54,17 @@ namespace global_planner {
               if (!reach_goal(twist) && isMoveable) {
                   mutex.lock(); // lock, because path can be changed in MapThread
                   find_nearst_pos();
-                  rotate(twist, 0.5);
+                  rotate(twist, 0.8);
                   move(twist);
                   ros::spinOnce();
                   mutex.unlock();
                   loop_rate.sleep();
               } else if (!isMoveable) {
                 pubZeroVel(twist);
-                rotate(twist, 0.05);
+                find_nearst_pos();
+                rotate(twist, 0.02);
+                //std::cout << "calc_movement(): " << calc_movement() << "\n";
+                request_new_plan = true;
                 sleep(1);
               }
           }
@@ -128,8 +131,14 @@ namespace global_planner {
           ROS_INFO("seeing block ...");
           speed = SLOW;
           steps = SHORT;
-          request_new_plan = true;
+          //request_new_plan = true;
           isMoveable = false;
+          return;
+        } else if (closest_range < 2 * MIN_PROXIMITY_RANGE_M) {
+          ROS_ERROR("Warnning for block ...");
+          speed = SLOW;
+          steps = LONG;
+          isMoveable = true;
           return;
         }
         speed = FAST;
@@ -141,8 +150,9 @@ namespace global_planner {
         ros::Rate loop_rate(10);
 
         while (calc_movement() > theta) {
+
             twist.linear.x = 0;
-            twist.angular.z = calc_movement() * rotateDirection;
+            twist.angular.z = 2 * calc_movement() * rotateDirection;
             pub_movement.publish(twist);
             ros::spinOnce();
             loop_rate.sleep();
@@ -209,7 +219,7 @@ namespace global_planner {
                 goals.pop();
                 request_new_plan = true;
                 while (request_new_plan) {
-                    sleep(0.1);
+                    sleep(1);
                 }
                 
             }

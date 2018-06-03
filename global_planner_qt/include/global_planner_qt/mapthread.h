@@ -30,6 +30,7 @@ private:
   bool isPathBlocked();
   void updateAll();
   void pubZeroVel();
+  void draw_costMap(int row, int col, int n, int value);
 };
 }
 

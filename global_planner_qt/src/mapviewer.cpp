@@ -56,8 +56,8 @@ void MapViewer::init_map()
         value = qRgb(128, 128, 128);  // gray unknow
       } else if (gridMap[i][j] == 110) {
         value = qRgb(255, 0, 0);      // red for costmap
-      } else if (gridMap[i][j] == 120) {
-        value = qRgb(255, 153, 0);
+      } else if (gridMap[i][j] >= 120) {
+        value = qRgb(255, gridMap[i][j], 0);
       } else {
         value = qRgb(0, 0, 0);        // black block
       }
@@ -81,8 +81,8 @@ void MapViewer::drawMap()
         value = qRgb(128, 128, 128);  // gray unknow
       } else if (gridMap[row][col] == 110) {
         value = qRgb(255, 0, 0);      // rot for costmap
-      } else if (gridMap[row][col] == 120) {
-        value = qRgb(255, 153, 0);
+      } else if (gridMap[row][col] >= 120) {
+        value = qRgb(255, gridMap[row][col], 0);
       } else {
         value = qRgb(0, 0, 0);        // black block
       }

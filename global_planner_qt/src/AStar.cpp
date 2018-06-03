@@ -48,8 +48,8 @@ double AStar::calculateHValue(const std::vector<std::vector<int> > &grid, int ro
     // Return using the distance formula
     double HValue = ((double)sqrt ((row - dest.first)*(row - dest.first)
                                    + (col - dest.second)*(col - dest.second)));
-    if (grid[row][col] == 120) {
-      HValue += 50.0;
+    if (grid[row][col] >= 120) {
+      HValue += 20.0 + grid[row][col] - 120;
     }
     return HValue;
 }
@@ -75,7 +75,6 @@ void AStar::tracePath(cell** cellDetails, const Pair &dest, std::vector<Pair> &p
 
 bool AStar::aStarSearch(const std::vector<std::vector<int> > &grid, const Pair &start, const Pair &dest, std::vector<Pair> &plan)
 {
-  ROS_ERROR("in astarSearch");
 	int ROW = grid.size();
 	int COL = grid[0].size();
 
