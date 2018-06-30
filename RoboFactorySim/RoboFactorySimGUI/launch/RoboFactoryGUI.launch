@@ -1,0 +1,146 @@
+<?xml version="1.0"?>
+<launch>
+	<master auto="start"/>
+  	<param name="/use_sim_time" value="true"/>
+
+	<arg name="model" default="$(env TURTLEBOT3_MODEL)" doc="model type [burger, waffle, waffle_pi]"/>
+	<!-- Turtlebot3 -->
+  	<include file="$(find turtlebot3_bringup)/launch/turtlebot3_remote.launch" />
+
+        <!-- load environment arena -->
+        <include file="$(find arena)/launch/easy_arena.launch" />
+        <!--	turtlebot3_slam.launch-->
+        <group ns = "robot_1">
+            <param name="robot_description" command="$(find xacro)/xacro.py $(find turtlebot3_description)/urdf/turtlebot3_$(arg model).urdf.xacro" />
+
+            <arg name="x_pos" default="-1.2"/>
+            <arg name="y_pos" default="-2.73"/>
+            <arg name="z_pos" default="0.01"/>
+            <arg name="yaw" default="1.57"/>
+
+            <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen">
+              <param name="publish_frequency" type="double" value="50.0" />
+              <param name="tf_prefix" value="robot_1" />
+            </node>
+
+            <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-urdf -model robot_1 -x $(arg x_pos) -y $(arg y_pos) -z $(arg z_pos) -Y $(arg yaw) -param robot_description" />
+        </group>
+
+
+        <group ns = "robot_0">
+            <param name="robot_description" command="$(find xacro)/xacro.py $(find turtlebot3_description)/urdf/turtlebot3_$(arg model).urdf.xacro" />
+
+            <arg name="x_pos" default="-0.788"/>
+            <arg name="y_pos" default="-2.73"/>
+            <arg name="z_pos" default="0.01"/>
+            <arg name="yaw" default="1.57"/>
+
+            <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen">
+              <param name="publish_frequency" type="double" value="50.0" />
+              <param name="tf_prefix" value="robot_0" />
+            </node>
+
+            <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-urdf -model robot_0 -x $(arg x_pos) -y $(arg y_pos) -z $(arg z_pos) -Y $(arg yaw) -param robot_description" />
+        </group>
+	
+        <!-- Gmapping -->
+        <arg name="ns0" default="robot_0" />
+        <!-- Gmapping -->
+          <node pkg="gmapping" type="slam_gmapping" name="$(arg ns0)_slam_gmapping" output="screen">
+            <param name="base_frame" value="$(arg ns0)/base_footprint"/>
+            <param name="odom_frame" value="$(arg ns0)/odom"/>
+            <param name="map_update_interval" value="2.0"/>
+            <param name="maxUrange" value="4.0"/>
+            <param name="minimumScore" value="100"/>
+            <param name="linearUpdate" value="0.2"/>
+            <param name="angularUpdate" value="0.2"/>
+            <param name="temporalUpdate" value="0.5"/>
+            <param name="delta" value="0.01"/>  <!-- 0.05 -->
+            <param name="lskip" value="0"/>
+            <param name="particles" value="120"/>
+            <param name="sigma" value="0.05"/>
+            <param name="kernelSize" value="1"/>
+            <param name="lstep" value="0.05"/>
+            <param name="astep" value="0.05"/>
+            <param name="iterations" value="5"/>
+            <param name="lsigma" value="0.075"/>
+            <param name="ogain" value="3.0"/>
+            <param name="srr" value="0.01"/>
+            <param name="srt" value="0.02"/>
+            <param name="str" value="0.01"/>
+            <param name="stt" value="0.02"/>
+            <param name="resampleThreshold" value="0.5"/>
+            <param name="xmin" value="-10.0"/>
+            <param name="ymin" value="-10.0"/>
+            <param name="xmax" value="10.0"/>
+            <param name="ymax" value="10.0"/>
+            <param name="llsamplerange" value="0.01"/>
+            <param name="llsamplestep" value="0.01"/>
+            <param name="lasamplerange" value="0.005"/>
+            <param name="lasamplestep" value="0.005"/>
+
+            <remap from="scan" to="$(arg ns0)/scan"/>
+            <remap from="map" to="$(arg ns0)/map"/>
+          </node>
+
+        <arg name="ns1" default="robot_1" />
+        <!-- Gmapping -->
+          <node pkg="gmapping" type="slam_gmapping" name="$(arg ns1)_slam_gmapping" output="screen">
+            <param name="base_frame" value="$(arg ns1)/base_footprint"/>
+            <param name="odom_frame" value="$(arg ns1)/odom"/>
+            <param name="map_update_interval" value="2.0"/>
+            <param name="maxUrange" value="4.0"/>
+            <param name="minimumScore" value="100"/>
+            <param name="linearUpdate" value="0.2"/>
+            <param name="angularUpdate" value="0.2"/>
+            <param name="temporalUpdate" value="0.5"/>
+            <param name="delta" value="0.01"/>  <!-- 0.05 -->
+            <param name="lskip" value="0"/>
+            <param name="particles" value="120"/>
+            <param name="sigma" value="0.05"/>
+            <param name="kernelSize" value="1"/>
+            <param name="lstep" value="0.05"/>
+            <param name="astep" value="0.05"/>
+            <param name="iterations" value="5"/>
+            <param name="lsigma" value="0.075"/>
+            <param name="ogain" value="3.0"/>
+            <param name="srr" value="0.01"/>
+            <param name="srt" value="0.02"/>
+            <param name="str" value="0.01"/>
+            <param name="stt" value="0.02"/>
+            <param name="resampleThreshold" value="0.5"/>
+            <param name="xmin" value="-10.0"/>
+            <param name="ymin" value="-10.0"/>
+            <param name="xmax" value="10.0"/>
+            <param name="ymax" value="10.0"/>
+            <param name="llsamplerange" value="0.01"/>
+            <param name="llsamplestep" value="0.01"/>
+            <param name="lasamplerange" value="0.005"/>
+            <param name="lasamplestep" value="0.005"/>
+
+            <remap from="scan" to="$(arg ns1)/scan"/>
+            <remap from="map" to="$(arg ns1)/map"/>
+          </node>
+
+
+
+	<node pkg="referee_node" type="spawn_obj" name="spawn_obj" />
+	<node pkg="referee_node" type="despawn_obj" name="despawn_obj" />
+	<node pkg="referee_node" type="spawn_resources" name="spawn_resources" />
+	<node pkg="referee_node" type="referee_node" name="referee_node" />
+
+        <node pkg="referee_node" type="machine_blue_1" name="machine_blue_1" />
+        <node pkg="referee_node" type="machine_blue_2" name="machine_blue_2" />
+        <node pkg="referee_node" type="machine_red_1" name="machine_red_1" />
+        <node pkg="referee_node" type="machine_red_2" name="machine_red_2" />
+        <node pkg="referee_node" type="machine_yellow_1" name="machine_yellow_1" />
+        <node pkg="referee_node" type="machine_yellow_2" name="machine_yellow_2" />
+
+	<node pkg="robot_navigation" type="robot_navigation_node" name="robot0_node" args="robot_0" />
+	<node pkg="robot_navigation" type="robot_navigation_node" name="robot1_node" args="robot_1" />
+<!--
+	<node pkg="RoboFactorySimGUI" type="robot_factory_sim" name="robot_factory_sim" />
+
+-->
+
+</launch>
