@@ -36,7 +36,7 @@ void MainWindow::start_simulation()
   //processSim->start("/bin/bash", QStringList() << "-c" << command);
   processSim->start("xterm", QStringList() << "-e" << "roslaunch RoboFactorySimGUI RoboFactoryGUI.launch");
 
-  while (!init_image_robot0 || !init_image_robot1 || !init_image_arena) {
+  while (!init_image_robot0 || !init_image_robot1 || !init_camera_up_robot0 || !init_camera_up_robot1) {
     sleep(1);
   }
   gameWindow = new GameWindow(this);

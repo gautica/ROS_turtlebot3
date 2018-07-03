@@ -2,6 +2,12 @@
     <qresource prefix="/">
         <file>images/icon.png</file>
         <file>images/open_file_icon.png</file>
-        <file>images/end.jpg</file>
+        <file>images/Black.png</file>
+        <file>images/Blue.png</file>
+        <file>images/Green.png</file>
+        <file>images/Orange.png</file>
+        <file>images/Pink.png</file>
+        <file>images/Red.png</file>
+        <file>images/Yellow.png</file>
     </qresource>
 </RCC>

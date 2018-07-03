@@ -30,6 +30,10 @@ private:
   void store_green_product();
   void create_black_product();
   void store_black_product();
+
+private:
+  ros::NodeHandle nh;
+  ros::Publisher publish_machine;
 /**
   void find_white_resource(std::pair<int, int> &resource_pos);
   void find_blue_resource(std::pair<int, int> &resource_pos);

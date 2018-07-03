@@ -10,6 +10,7 @@ namespace global_planner {
 Grab::Grab() : Resource()
 {
   found_resources = false;
+  found_roboter_link = false;
 
   publisher = nh.advertise<gazebo_msgs::ModelState>("/gazebo/set_model_state", 1);
   sub_resource_position = nh.subscribe("/gazebo/model_states", 1, &Grab::resource_pose_Callback, this);
@@ -18,8 +19,12 @@ Grab::Grab() : Resource()
 
 void Grab::pose_Callback(const gazebo_msgs::LinkStates::ConstPtr &msg)
 {
+  if(!found_roboter_link)
+  {
     link_info.name = msg->name;
     link_info.pose = msg->pose;
+    found_roboter_link = true;
+  }
 }
 
 void Grab::resource_pose_Callback(const gazebo_msgs::ModelStates::ConstPtr& msg)
@@ -53,7 +58,7 @@ void Grab::grab_resource()
 {
     while(ok())
     {
-        if(found_resources)
+        if(found_resources && found_roboter_link)
         {
             int i = 0;
             int nearest_resource_index = 0;
@@ -87,7 +92,7 @@ void Grab::grab_resource()
             modelstate.pose.position.y = link_info.pose[i].position.y;
             modelstate.pose.position.z = 0.03;
             modelstate.reference_frame = (std::string) "world";
-            publisher.publish(modelstate);
+
 
             resources[nearest_resource_index].blocked = true;
 
@@ -99,6 +104,7 @@ void Grab::grab_resource()
             attach_srv.request.model_name_2 = roboter_name;
             attach_srv.request.link_name_2 = "gripper_link";
 
+            publisher.publish(modelstate);
             if (client.call(attach_srv))
             {
                 ROS_ERROR("Attached");

@@ -132,15 +132,6 @@ void MapThread::calc_costMap()
         for (int i = 1; i <= orangeRange; i++) {
           draw_costMap(row, col, i + redRange, Upper - i * 15);
         }
-        /**
-        for (int n = -(redRange+orangeRange); n <= (redRange+orangeRange); n++) {
-          for (int m = -(redRange+orangeRange); m <= (redRange+orangeRange); m++) {
-            if (gridMap[row+n][col+m] != 100 && gridMap[row+n][col+m] != 110 && gridMap[row+n][col+m] != 120) {
-              gridMap[row+n][col+m] = 120;    // 120 indicate orange area
-            }
-          }
-        }
-        */
       }
     }
   }

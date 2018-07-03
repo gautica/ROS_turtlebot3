@@ -46,7 +46,7 @@
         <!-- Gmapping -->
         <arg name="ns0" default="robot_0" />
         <!-- Gmapping -->
-          <node pkg="gmapping" type="slam_gmapping" name="$(arg ns0)_slam_gmapping" output="screen">
+          <node pkg="gmapping" type="slam_gmapping" name="$(arg ns0)_slam_gmapping">
             <param name="base_frame" value="$(arg ns0)/base_footprint"/>
             <param name="odom_frame" value="$(arg ns0)/odom"/>
             <param name="map_update_interval" value="2.0"/>
@@ -85,7 +85,7 @@
 
         <arg name="ns1" default="robot_1" />
         <!-- Gmapping -->
-          <node pkg="gmapping" type="slam_gmapping" name="$(arg ns1)_slam_gmapping" output="screen">
+          <node pkg="gmapping" type="slam_gmapping" name="$(arg ns1)_slam_gmapping">
             <param name="base_frame" value="$(arg ns1)/base_footprint"/>
             <param name="odom_frame" value="$(arg ns1)/odom"/>
             <param name="map_update_interval" value="2.0"/>
@@ -136,11 +136,10 @@
         <node pkg="referee_node" type="machine_yellow_1" name="machine_yellow_1" />
         <node pkg="referee_node" type="machine_yellow_2" name="machine_yellow_2" />
 
-	<node pkg="robot_navigation" type="robot_navigation_node" name="robot0_node" args="robot_0" />
-	<node pkg="robot_navigation" type="robot_navigation_node" name="robot1_node" args="robot_1" />
-<!--
+        <node pkg="robot_navigation" type="robot_navigation_node" name="robot0_node" args="robot_0" output="screen" />
+        <node pkg="robot_navigation" type="robot_navigation_node" name="robot1_node" args="robot_1" output="screen" />
+        <!--
 	<node pkg="RoboFactorySimGUI" type="robot_factory_sim" name="robot_factory_sim" />
-
 -->
 
 </launch>

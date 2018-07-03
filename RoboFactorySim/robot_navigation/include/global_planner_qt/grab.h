@@ -22,6 +22,8 @@ private:
   ros::Subscriber sub_resource_position;
 
   bool found_resources;
+  bool found_roboter_link;
+
   std::vector<Resource::Resource_t> local_resources;
   gazebo_msgs::LinkStates link_info;
 

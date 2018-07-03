@@ -34,31 +34,6 @@ void Referee::machine_pose_callback(const referee_node::referee_machines::ConstP
 
 void Referee::resource_pose_callback(const referee_node::referee_resources::ConstPtr &msg)
 {
-  /*std::vector<referee_node::referee_resource> resources_temp;
-
-  for(int i = 0; i < resources.size(); i++)
-  {
-      resources_temp.push_back(resources[i]);
-  }
-
-  resources.clear();
-
-  for (int i = 0; i < msg->resources.size(); i++)
-  {
-    resources.push_back(msg->resources[i]);
-
-    referee_node::referee_resource found_resource;
-    for(int j = 0; j < resources_temp.size(); j++)
-    {
-      if(resources_temp[j].name.compare(msg->resources[i].name) == 0)
-      {
-        found_resource = resources_temp[j];
-      }
-    }
-    resources[i].blocked = found_resource.blocked;
-  }
-  resources_updated = true;
-  */
 
   resources.clear();
   for(int i = 0; i < msg->resources.size(); i++)

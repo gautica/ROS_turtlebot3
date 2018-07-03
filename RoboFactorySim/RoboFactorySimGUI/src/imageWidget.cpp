@@ -44,9 +44,11 @@ void ImageDisplay::update()
     currentImage = QImage(robot0_buffer, robot0_width, robot0_height, QImage::Format_RGB888);
   } else if (modell_id == 1) {
     currentImage = QImage(robot1_buffer, robot1_width, robot1_height, QImage::Format_RGB888);
-  } else if(modell_id = 2) {
-    currentImage = QImage(arena_buffer, arena_width, arena_height, QImage::Format_RGB888);
-  } else {
+  } else if(modell_id == 2) {
+    currentImage = QImage(robot0_camera_up_buffer, robot0_camera_up_width, robot0_camera_up_height, QImage::Format_RGB888);
+  } else if (modell_id == 3) {
+    currentImage = QImage(robot1_camera_up_buffer, robot1_camera_up_width, robot1_camera_up_height, QImage::Format_RGB888);
+  }else {
     std::cout << "unvailid robot_id for image viewer\n";
     exit(-1);
   }

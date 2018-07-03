@@ -91,11 +91,15 @@ int main(int argc, char** argv) {
     ROS_ERROR("Unvailid robot name, should be robot_0 or robot_1");
     exit(-1);
   }
-
-  if (client.call(service)) {
-    ROS_INFO("Request service sucessfully, receieve product number %ld", service.response.result);
+  while (curr_product == -1) {
+    if (client.call(service)) {
+      ROS_INFO("Request service sucessfully, receieve product number %ld", service.response.result);
+      curr_product = service.response.result;
+    }
+    sleep(1);
   }
-  curr_product = service.response.result;
+
+
   global_planner::Routing routing;
   routing.make_plan();
 

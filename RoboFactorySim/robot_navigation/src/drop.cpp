@@ -20,8 +20,12 @@ Drop::Drop() : Resource()
  */
 void Drop::pose_Callback(const gazebo_msgs::LinkStates::ConstPtr &msg)
 {
+  if(!found_roboter_link)
+  {
     link_info.name = msg->name;
     link_info.pose = msg->pose;
+    found_roboter_link = true;
+  }
 }
 
 /*
@@ -61,7 +65,7 @@ void Drop::drop_resource()
   //Wait until resources are found
   while(ok())
   {
-    if(found_resources)
+    if(found_resources && found_roboter_link)
     {
        int i = 0; //Gripper-Link ID
        int nearest_resource_index = 0;

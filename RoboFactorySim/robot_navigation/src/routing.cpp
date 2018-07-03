@@ -10,7 +10,7 @@ namespace global_planner {
 Routing::Routing()
 {
   refer = new Referee;
-
+  publish_machine = nh.advertise<robot_navigation::got_resource>("/roboter/resource", 1);
 }
 
 Routing::~Routing()
@@ -34,8 +34,9 @@ void Routing::make_plan()
     }
     if (client.call(service)) {
       ROS_INFO("Request service sucessfully, receieve product number %ld", service.response.result);
+      curr_product = service.response.result;
     }
-    curr_product = service.response.result;
+
     if (curr_product == NO_PRODUCT) {
       is_job_finished = true;
       is_goal_ready = false;
@@ -519,108 +520,7 @@ void Routing::store_black_product()
   is_job_finished = false;
   is_goal_ready = true;
 }
-/**
-void Routing::find_blue_resource(std::pair<int, int> &resource_pos)
-{
-  refer->update_referee_info();
-  while (!find_resource("Blue", resource_pos)) {
-    refer->update_referee_info();
-    sleep(5);
-  }
-  sleep(3);
-  refer->update_referee_info();
-  find_resource("Blue", resource_pos);
-  ROS_ERROR("Blue resource is found");
-}
 
-void Routing::find_red_resource(std::pair<int, int> &resource_pos)
-{
-  refer->update_referee_info();
-  while (!find_resource("Red", resource_pos)) {
-    refer->update_referee_info();
-    sleep(5);
-  }
-  sleep(3);
-  refer->update_referee_info();
-  find_resource("Red", resource_pos);
-  ROS_ERROR("Red resource is found");
-}
-
-void Routing::find_yellow_resource(std::pair<int, int> &resource_pos)
-{
-  refer->update_referee_info();
-  while (!find_resource("Yellow", resource_pos)) {
-    refer->update_referee_info();
-    sleep(5);
-  }
-  sleep(3);
-  refer->update_referee_info();
-  find_resource("Yellow", resource_pos);
-  ROS_ERROR("Yellow resource is found");
-}
-
-void Routing::find_violet_resource(std::pair<int, int> &resource_pos)
-{
-  refer->update_referee_info();
-  while (!find_resource("Violet", resource_pos)) {
-    refer->update_referee_info();
-    sleep(5);
-  }
-  sleep(3);
-  refer->update_referee_info();
-  find_resource("Violet", resource_pos);
-  ROS_ERROR("Violet resource is found");
-}
-
-void Routing::find_orange_resource(std::pair<int, int> &resource_pos)
-{
-  refer->update_referee_info();
-  while (!find_resource("Orange", resource_pos)) {
-    refer->update_referee_info();
-    sleep(5);
-  }
-  sleep(3);
-  refer->update_referee_info();
-  find_resource("Orange", resource_pos);
-  ROS_ERROR("Orange resource is found");
-}
-
-void Routing::find_green_resource(std::pair<int, int> &resource_pos)
-{
-  refer->update_referee_info();
-  while (!find_resource("Green", resource_pos)) {
-    refer->update_referee_info();
-    sleep(5);
-  }
-  sleep(3);
-  refer->update_referee_info();
-  find_resource("Green", resource_pos);
-  ROS_ERROR("Green resource is found");
-}
-
-void Routing::find_black_resource(std::pair<int, int> &resource_pos)
-{
-  refer->update_referee_info();
-  while (!find_resource("Black", resource_pos)) {
-    refer->update_referee_info();
-    sleep(5);
-  }
-  sleep(3);
-  refer->update_referee_info();
-  find_resource("Green", resource_pos);
-  ROS_ERROR("Green resource is found");
-}
-
-void Routing::find_white_resource(std::pair<int, int> &resource_pos)
-{
-  refer->update_referee_info();
-  while (!find_resource("White", resource_pos)) {
-    refer->update_referee_info();
-    sleep(5);
-  }
-  ROS_ERROR("white resource is found");
-}
-*/
 void Routing::find_blue_machine(std::pair<int, int> &machine_pos, std::pair<int, int> &resource_pos)
 {
   while (!find_machine(0, 3, machine_pos, resource_pos)) {
@@ -735,12 +635,10 @@ bool Routing::find_machine(int ID1, int ID2, std::pair<int, int> &machine_pos, s
 
 void Routing::pub_resource_status(int index)
 {
-  ros::NodeHandle nh;
-  ros::Publisher publish_machine = nh.advertise<robot_navigation::got_resource>("/roboter/resource", 1);
   robot_navigation::got_resource resource_msg;
   resource_msg.resource_blocked = true;
   resource_msg.resource_name = resources[index].name;
-  sleep(1);
+  //sleep(1);
   publish_machine.publish(resource_msg);
 }
 
