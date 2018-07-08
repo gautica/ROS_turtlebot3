@@ -23,7 +23,7 @@ class MoveBase
   };
   enum SPEED_MPS {
     SLOW = 8,
-    FAST = 40
+    FAST = 50
   };
   enum STEPS {
     SHORT = 5,

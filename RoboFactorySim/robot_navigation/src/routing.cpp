@@ -525,25 +525,36 @@ void Routing::find_blue_machine(std::pair<int, int> &machine_pos, std::pair<int,
 {
   while (!find_machine(0, 3, machine_pos, resource_pos)) {
     refer->update_referee_info();
-    sleep(5);
+    //sleep(5);
   }
   ROS_ERROR("blue machine is found with x = %d, y = %d", machine_pos.second, machine_pos.first);
 }
 
 void Routing::find_red_machine(std::pair<int, int> &machine_pos, std::pair<int, int> &resource_pos)
 {
+  /**
+  std::pair<int, int> temp;
+  calc_coordinate_matrix(machines[1].pos_x, machines[1].pos_y, temp);
+  machine_pos.first = temp.first + 90;
+  machine_pos.second = temp.second;
+  **/
   while (!find_machine(1, 4, machine_pos, resource_pos)) {
     refer->update_referee_info();
-    sleep(5);
+    //sleep(5);
   }
+  std::pair<int, int> temp;
+  calc_coordinate_matrix(machines[1].pos_x, machines[1].pos_y, temp);
+  machine_pos.first = temp.first + 90;
+  machine_pos.second = temp.second;
   ROS_ERROR("red machine is found with x = %d, y = %d", machine_pos.second, machine_pos.first);
+
 }
 
 void Routing::find_yellow_machine(std::pair<int, int> &machine_pos, std::pair<int, int> &resource_pos)
 {
   while (!find_machine(2, 5, machine_pos, resource_pos)) {
     refer->update_referee_info();
-    sleep(5);
+    //sleep(5);
   }
   ROS_ERROR("yellow machine is found with x = %d, y = %d", machine_pos.second, machine_pos.first);
 }
@@ -569,9 +580,9 @@ void Routing::wait_resource_to_find(const string &str, std::pair<int, int> &reso
   refer->update_referee_info();
   while (!find_resource(str, resource_pos, false)) {
     refer->update_referee_info();
-    sleep(5);
+    sleep(2);
   }
-  sleep(4);
+  sleep(3);
   refer->update_referee_info();
   find_resource(str, resource_pos, true);
   ROS_ERROR("white resource is found");

@@ -24,6 +24,8 @@ include_directories(${catkin_INCLUDE_DIRS})
   add_message_files(
     FILES
     got_resource.msg
+    position.msg
+    robot_info.msg
   )
 
 add_service_files(

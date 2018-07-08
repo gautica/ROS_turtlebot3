@@ -248,12 +248,10 @@ namespace global_planner {
     }
 
     void MoveBase::find_nearst_pos() {
-        int count = 5;
-        while (calc_distance(path[path.size() - 1], roboter_pos) > calc_distance(path[path.size() - 5], roboter_pos)) {
-            path.pop_back();
-            path.pop_back();;
-            path.pop_back();
-            path.pop_back();
+        int count = path.size() - 1;
+        while (calc_distance(path[count], roboter_pos) > calc_distance(path[count - 5], roboter_pos)) {
+            path.resize(count - 10);
+            count = path.size() - 1;
         }
 
     }

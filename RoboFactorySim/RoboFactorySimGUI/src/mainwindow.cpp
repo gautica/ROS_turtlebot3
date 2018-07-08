@@ -34,7 +34,14 @@ void MainWindow::start_simulation()
   // open launch file
 
   //processSim->start("/bin/bash", QStringList() << "-c" << command);
-  processSim->start("xterm", QStringList() << "-e" << "roslaunch RoboFactorySimGUI RoboFactoryGUI.launch");
+  //processSim->start("xterm", QStringList() << "-e" << "roslaunch RoboFactorySimGUI RoboFactoryGUI.launch");
+  if (curr_gamemode == KI_VS_KI) {
+    processSim->start("xterm", QStringList() << "-e" << "roslaunch RoboFactorySimGUI RoboFactoryGUI.launch");
+  } else if (curr_gamemode == PLAYER_VS_PLAYER) {
+    processSim->start("xterm", QStringList() << "-e" << "roslaunch roboter_controller start_competetive.launch");
+  } else if (curr_gamemode == AS_TEAM) {
+
+  }
 
   while (!init_image_robot0 || !init_image_robot1 || !init_camera_up_robot0 || !init_camera_up_robot1) {
     sleep(1);

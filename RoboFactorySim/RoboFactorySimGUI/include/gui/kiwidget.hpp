@@ -18,7 +18,7 @@ class KIWidget : public QWidget
 public:
   explicit KIWidget(QWidget *parent = 0);
   ~KIWidget();
-private Q_SLOTS:
+
   void update_window();
 
 private:

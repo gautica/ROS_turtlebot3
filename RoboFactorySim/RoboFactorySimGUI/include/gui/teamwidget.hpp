@@ -16,7 +16,9 @@ class TeamWidget : public QWidget
 public:
   explicit TeamWidget(QWidget *parent = 0);
   ~TeamWidget();
-
+  void update_window();
+private:
+  QString set_styleSheet(int ID);
 private:
   Ui::TeamWidget *ui;
 };

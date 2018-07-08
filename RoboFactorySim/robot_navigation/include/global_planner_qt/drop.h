@@ -21,6 +21,7 @@ private:
   ros::Subscriber sub;
   ros::Subscriber sub_resource_position;
   ros::Publisher publish_machine;
+  ros::ServiceClient client;
 
   bool found_resources;
   bool found_roboter_link;

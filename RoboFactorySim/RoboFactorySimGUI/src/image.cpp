@@ -3,10 +3,10 @@
 
 Image::Image()
 {
-  sub_image_robot0 = nh.subscribe("/robot_0/robot_camera/image_raw", 1, &Image::processImageDataRobot0, this);
-  sub_image_robot1 = nh.subscribe("/robot_1/robot_camera/image_raw", 1, &Image::processImageDataRobot1, this);
-  sub_camera_up_robot0 = nh.subscribe("/robot_0/robot_camera_up/image_raw", 1, &Image::processCameraUpRobot0, this);
-  sub_camera_up_robot1 = nh.subscribe("/robot_0/robot_camera_up/image_raw", 1, &Image::processCameraUpRobot1, this);
+  sub_image_robot0 = nh.subscribe("/robot_0/robot_camera/image_raw", 10, &Image::processImageDataRobot0, this);
+  sub_image_robot1 = nh.subscribe("/robot_1/robot_camera/image_raw", 10, &Image::processImageDataRobot1, this);
+  sub_camera_up_robot0 = nh.subscribe("/robot_0/robot_camera_up/image_raw", 10, &Image::processCameraUpRobot0, this);
+  sub_camera_up_robot1 = nh.subscribe("/robot_1/robot_camera_up/image_raw", 10, &Image::processCameraUpRobot1, this);
   //sub_image_arena = nh.subscribe("/arena_camera/image_raw", 1, &Image::processImageDataArena, this);
 }
 

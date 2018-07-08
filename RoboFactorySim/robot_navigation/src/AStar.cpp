@@ -49,7 +49,7 @@ double AStar::calculateHValue(const std::vector<std::vector<int> > &grid, int ro
     double HValue = ((double)sqrt ((row - dest.first)*(row - dest.first)
                                    + (col - dest.second)*(col - dest.second)));
     if (grid[row][col] >= 120) {
-      HValue += 150.0 + grid[row][col] - 120;
+      HValue += 50.0 + grid[row][col] - 120;
     }
     return HValue;
 }

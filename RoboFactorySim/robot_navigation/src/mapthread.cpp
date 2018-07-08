@@ -9,7 +9,7 @@ namespace global_planner {
 MapThread::MapThread()
 {
   this->astar = new AStar;
-  map_sub = nh.subscribe("/" + roboter_name + "/map", 1, &MapThread::updateMap, this);
+  map_sub = nh.subscribe("/" + roboter_name + "/map", 10, &MapThread::updateMap, this);
   pub_vel = nh.advertise<geometry_msgs::Twist>("/" + roboter_name + "/cmd_vel", 1);
   //initMap();
 }
@@ -114,8 +114,8 @@ bool MapThread::isPathBlocked()
 
 void MapThread::calc_costMap()
 {
-  int redRange = 16;
-  int orangeRange = 15;
+  int redRange = 10;
+  int orangeRange = 25;
   int Upper = orangeRange * 15 + 120;
   int roboter_row = roboter_pos.first;
   int roboter_col = roboter_pos.second;

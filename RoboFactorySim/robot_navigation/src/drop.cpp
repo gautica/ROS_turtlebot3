@@ -10,6 +10,7 @@ Drop::Drop() : Resource()
   found_resources = false;
 
   publish_machine = nh.advertise<robot_navigation::got_resource>("/roboter/resource", 1);
+  client = nh.serviceClient<robot_navigation::Attach>("/link_attacher_node/detach");
 
   sub_resource_position = nh.subscribe("/gazebo/model_states", 1, &Drop::resource_pose_Callback, this);
   sub = nh.subscribe("/gazebo/link_states", 1, &Drop::pose_Callback, this);
@@ -94,26 +95,17 @@ void Drop::drop_resource()
            }
        }
 
+       //Publish Messages
+       robot_navigation::got_resource resource_msg;
+       resource_msg.roboter_name = roboter_name;
+       resource_msg.resource_name = local_resources.at(nearest_resource_index).name;
+
        //Detach Resource
-       ros::ServiceClient client = nh.serviceClient<robot_navigation::Attach>("/link_attacher_node/detach");
        robot_navigation::Attach attach_srv;
        attach_srv.request.model_name_1 = local_resources.at(nearest_resource_index).name;
        attach_srv.request.link_name_1 = "link";
        attach_srv.request.model_name_2 = roboter_name;
        attach_srv.request.link_name_2 = "gripper_link";
-       if (client.call(attach_srv))
-       {
-           ROS_ERROR("Detach");
-       }
-       else
-       {
-           ROS_ERROR("Detach FAILED");
-       }
-
-       //Publish Messages
-       robot_navigation::got_resource resource_msg;
-       resource_msg.roboter_name = roboter_name;
-       resource_msg.resource_name = local_resources.at(nearest_resource_index).name;
 
        //Set Resource blocked or unblocked
        if(machine_id != -1)
@@ -128,6 +120,7 @@ void Drop::drop_resource()
 
        sleep(1);
        publish_machine.publish(resource_msg);
+       client.call(attach_srv);
 
        //Reset drop
        grabbed = false;

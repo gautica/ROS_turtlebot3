@@ -13,48 +13,103 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">background-color: rgb(48, 48, 48);</string>
+  </property>
   <layout class="QHBoxLayout" name="horizontalLayout_2">
+   <property name="spacing">
+    <number>0</number>
+   </property>
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout" stretch="5,3">
+    <layout class="QHBoxLayout" name="horizontalLayout" stretch="2,1">
      <property name="spacing">
       <number>0</number>
      </property>
      <item>
       <widget class="QWidget" name="widget_2" native="true">
        <layout class="QVBoxLayout" name="verticalLayout_2">
+        <property name="spacing">
+         <number>0</number>
+        </property>
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
         <item>
-         <layout class="QVBoxLayout" name="verticalLayout">
+         <layout class="QVBoxLayout" name="verticalLayout" stretch="1,1">
+          <property name="spacing">
+           <number>0</number>
+          </property>
           <item>
            <widget class="QWidget" name="widget_3" native="true">
             <layout class="QHBoxLayout" name="horizontalLayout_4">
+             <property name="spacing">
+              <number>0</number>
+             </property>
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
              <item>
               <layout class="QGridLayout" name="gridLayout_2">
                <item row="0" column="0">
                 <widget class="QWidget" name="widget_6" native="true">
-                 <layout class="QGridLayout" name="gridLayout">
-                  <item row="1" column="0">
-                   <widget class="QLabel" name="curr_assigment_0">
+                 <layout class="QHBoxLayout" name="horizontalLayout_5">
+                  <property name="spacing">
+                   <number>2</number>
+                  </property>
+                  <property name="leftMargin">
+                   <number>2</number>
+                  </property>
+                  <property name="topMargin">
+                   <number>2</number>
+                  </property>
+                  <property name="rightMargin">
+                   <number>2</number>
+                  </property>
+                  <property name="bottomMargin">
+                   <number>2</number>
+                  </property>
+                  <item>
+                   <widget class="QLabel" name="label_2">
+                    <property name="styleSheet">
+                     <string notr="true">border-image: url(:/images/Roboter0.png);</string>
+                    </property>
                     <property name="text">
-                     <string>Current Assignment :</string>
+                     <string/>
                     </property>
                    </widget>
                   </item>
-                  <item row="0" column="0">
-                   <widget class="QLabel" name="robot_0">
-                    <property name="text">
-                     <string>Robot_0 Status :</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="1" column="1">
+                  <item>
                    <widget class="QLabel" name="curr_assigment_image_0">
-                    <property name="text">
-                     <string>TextLabel</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="1">
-                   <widget class="QLabel" name="label_4">
                     <property name="text">
                      <string/>
                     </property>
@@ -65,32 +120,48 @@
                </item>
                <item row="0" column="1">
                 <widget class="QWidget" name="widget_5" native="true">
-                 <layout class="QGridLayout" name="gridLayout_3">
-                  <item row="0" column="0">
+                 <layout class="QHBoxLayout" name="horizontalLayout_6">
+                  <property name="spacing">
+                   <number>2</number>
+                  </property>
+                  <property name="leftMargin">
+                   <number>2</number>
+                  </property>
+                  <property name="topMargin">
+                   <number>2</number>
+                  </property>
+                  <property name="rightMargin">
+                   <number>2</number>
+                  </property>
+                  <property name="bottomMargin">
+                   <number>2</number>
+                  </property>
+                  <item>
                    <widget class="QLabel" name="robot_1">
-                    <property name="text">
-                     <string>Robot_1 Status :</string>
+                    <property name="styleSheet">
+                     <string notr="true">border-image: url(:/images/Roboter1.png);</string>
                     </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="1">
-                   <widget class="QLabel" name="label_7">
                     <property name="text">
                      <string/>
                     </property>
                    </widget>
                   </item>
-                  <item row="1" column="0">
-                   <widget class="QLabel" name="curr_assignment_1">
-                    <property name="text">
-                     <string>Current Assignment :</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="1" column="1">
+                  <item>
                    <widget class="QLabel" name="curr_assigment_image_1">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="autoFillBackground">
+                     <bool>false</bool>
+                    </property>
                     <property name="text">
-                     <string>TextLabel</string>
+                     <string/>
+                    </property>
+                    <property name="scaledContents">
+                     <bool>false</bool>
                     </property>
                    </widget>
                   </item>
@@ -104,74 +175,68 @@
           </item>
           <item>
            <widget class="QWidget" name="widget_4" native="true">
-            <layout class="QGridLayout" name="gridLayout_4">
-             <item row="0" column="0">
-              <widget class="QLabel" name="ressource5">
-               <property name="text">
-                <string>TextLabel</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QLabel" name="ressource6">
-               <property name="text">
-                <string>TextLabel</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="2">
-              <widget class="QLabel" name="ressource7">
-               <property name="text">
-                <string>TextLabel</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="3">
-              <widget class="QLabel" name="ressource8">
-               <property name="text">
-                <string>TextLabel</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="4">
-              <widget class="QLabel" name="ressource9">
-               <property name="text">
-                <string>TextLabel</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
+            <layout class="QHBoxLayout" name="horizontalLayout_3">
+             <property name="spacing">
+              <number>20</number>
+             </property>
+             <property name="leftMargin">
+              <number>25</number>
+             </property>
+             <property name="topMargin">
+              <number>18</number>
+             </property>
+             <property name="rightMargin">
+              <number>25</number>
+             </property>
+             <property name="bottomMargin">
+              <number>9</number>
+             </property>
+             <item>
               <widget class="QLabel" name="ressource0">
+               <property name="styleSheet">
+                <string notr="true">background-color: rgb(128, 128, 128);</string>
+               </property>
                <property name="text">
-                <string>TextLabel</string>
+                <string/>
+               </property>
+               <property name="scaledContents">
+                <bool>true</bool>
+               </property>
+               <property name="margin">
+                <number>0</number>
                </property>
               </widget>
              </item>
-             <item row="1" column="1">
+             <item>
               <widget class="QLabel" name="ressource1">
+               <property name="styleSheet">
+                <string notr="true">background-color: rgb(128, 128, 128);</string>
+               </property>
                <property name="text">
-                <string>TextLabel</string>
+                <string/>
+               </property>
+               <property name="scaledContents">
+                <bool>true</bool>
                </property>
               </widget>
              </item>
-             <item row="1" column="2">
+             <item>
               <widget class="QLabel" name="ressource2">
                <property name="text">
-                <string>TextLabel</string>
+                <string/>
+               </property>
+               <property name="scaledContents">
+                <bool>true</bool>
                </property>
               </widget>
              </item>
-             <item row="1" column="3">
+             <item>
               <widget class="QLabel" name="ressource3">
                <property name="text">
-                <string>TextLabel</string>
+                <string/>
                </property>
-              </widget>
-             </item>
-             <item row="1" column="4">
-              <widget class="QLabel" name="ressource4">
-               <property name="text">
-                <string>TextLabel</string>
+               <property name="scaledContents">
+                <bool>true</bool>
                </property>
               </widget>
              </item>
@@ -186,10 +251,31 @@
      <item>
       <widget class="QWidget" name="widget" native="true">
        <layout class="QGridLayout" name="gridLayout_5">
+        <property name="leftMargin">
+         <number>20</number>
+        </property>
+        <property name="topMargin">
+         <number>20</number>
+        </property>
+        <property name="rightMargin">
+         <number>20</number>
+        </property>
+        <property name="bottomMargin">
+         <number>20</number>
+        </property>
+        <property name="spacing">
+         <number>20</number>
+        </property>
         <item row="0" column="0">
          <widget class="QLabel" name="label">
+          <property name="styleSheet">
+           <string notr="true">border-image: url(:/images/ORIGINALFARBE.png);</string>
+          </property>
           <property name="text">
-           <string>TextLabel</string>
+           <string/>
+          </property>
+          <property name="scaledContents">
+           <bool>true</bool>
           </property>
          </widget>
         </item>

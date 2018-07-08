@@ -5,6 +5,8 @@
 #include "../include/global_planner_qt/mapviewer.hpp"
 #include "../include/global_planner_qt/routing.h"
 #include "robot_navigation/Product.h"
+#include "robot_navigation/robot_info.h"
+#include "robot_navigation/position.h"
 #include <QApplication>
 #include <unistd.h>
 
@@ -56,7 +58,6 @@ int main(int argc, char** argv) {
   // Init ros node
   ros::init(argc, argv, "roboter_name");
   ros::NodeHandle nh;
-  //QApplication app(argc, argv);
 
   /**
    * @brief map_thread to initialize map
@@ -106,6 +107,24 @@ int main(int argc, char** argv) {
   //global_planner::MapViewer window;
   //window.show();
   //return app.exec();
+  ros::Publisher pub_path = nh.advertise<robot_navigation::robot_info>(roboter_name + "/robot_path", 1);
+  robot_navigation::robot_info path_info;
+  robot_navigation::position pos;
+  ros::Rate loop_rate(1);
+  while (ros::ok()) {
+    if (path.size() == 0) {
+      sleep(1);
+    }
+    path_info.path.clear();
+    for (int i = 0; i < path.size(); i++) {
+      pos.x = path[i].second;
+      pos.y = path[i].first;
+      path_info.path.push_back(pos);
+    }
+    pub_path.publish(path_info);
+    loop_rate.sleep();
+  }
+
   movebase_thread.wait();
   map_thread.wait();
   return 0;

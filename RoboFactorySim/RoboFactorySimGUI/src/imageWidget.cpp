@@ -15,7 +15,7 @@ ImageDisplay::ImageDisplay(QWidget *parent, int modell_id) :
 {
   ui->setupUi(this);
 
-
+/**
   label = new QLabel;
   label->setBackgroundRole(QPalette::Base);
   label->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
@@ -23,7 +23,7 @@ ImageDisplay::ImageDisplay(QWidget *parent, int modell_id) :
   QHBoxLayout *layout = new QHBoxLayout();
   layout->addWidget(label);
   setLayout(layout);
-
+*/
   //image = new Image;
 
   timer = new QTimer;
@@ -53,7 +53,7 @@ void ImageDisplay::update()
     exit(-1);
   }
 
-  label->setPixmap(QPixmap::fromImage(currentImage));
+  ui->label->setPixmap(QPixmap::fromImage(currentImage));
 }
 }
 

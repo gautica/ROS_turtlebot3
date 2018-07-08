@@ -18,7 +18,7 @@
             <arg name="z_pos" default="0.01"/>
             <arg name="yaw" default="1.57"/>
 
-            <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen">
+            <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
               <param name="publish_frequency" type="double" value="50.0" />
               <param name="tf_prefix" value="robot_1" />
             </node>
@@ -35,7 +35,7 @@
             <arg name="z_pos" default="0.01"/>
             <arg name="yaw" default="1.57"/>
 
-            <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen">
+            <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
               <param name="publish_frequency" type="double" value="50.0" />
               <param name="tf_prefix" value="robot_0" />
             </node>
@@ -138,8 +138,7 @@
 
         <node pkg="robot_navigation" type="robot_navigation_node" name="robot0_node" args="robot_0" output="screen" />
         <node pkg="robot_navigation" type="robot_navigation_node" name="robot1_node" args="robot_1" output="screen" />
-        <!--
+
 	<node pkg="RoboFactorySimGUI" type="robot_factory_sim" name="robot_factory_sim" />
--->
 
 </launch>

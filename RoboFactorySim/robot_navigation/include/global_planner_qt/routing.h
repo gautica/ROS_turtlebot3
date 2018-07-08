@@ -53,7 +53,7 @@ private:
   void wait_resource_to_find(const std::string &str, std::pair<int, int> &resource_pos);
   bool find_resource(const std::string &str, std::pair<int, int> &resource_pos, bool block);
   bool find_machine(int ID1, int ID2, std::pair<int, int> &machine_pos, std::pair<int, int> &resource_pos);
-
+  int nearst_machine;
   void pub_resource_status(int index);
   template<typename T>
   int signur(T num) {

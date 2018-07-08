@@ -105,6 +105,9 @@ void Grab::grab_resource()
             attach_srv.request.link_name_2 = "gripper_link";
 
             publisher.publish(modelstate);
+
+            Duration(0.05).sleep();
+
             if (client.call(attach_srv))
             {
                 ROS_ERROR("Attached");

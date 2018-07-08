@@ -21,7 +21,19 @@ enum GameMode
   AS_TEAM = 2
 };
 
+enum Robot_ID
+{
+  ROBOT_0 = 0,
+  ROBOT_1 = 1
+};
+
 //extern bool stopSim;
+extern std::vector<std::vector<int> > gridMap;
+extern std::vector<std::pair<int, int> > path_robot0;
+extern std::vector<std::pair<int, int> > path_robot1;
+extern std::vector<std::vector<int> > roboter_local_field;
+extern std::pair<int, int> robot0_pos;
+extern std::pair<int, int> robot1_pos;
 
 extern int curr_product_robo0;
 extern int curr_product_robo1;
@@ -56,7 +68,24 @@ extern bool init_camera_up_robot1;
 //extern bool init_image_arena;
 
 extern int curr_gamemode;
-
+extern int ROW;
+extern int COL;
+extern double mapResolution;
 extern bool update_status;
+extern bool is_map_init;
+extern bool is_robot0_pos_init;
+extern bool is_robot1_pos_init;
+extern bool is_robot0_path_init;
+extern bool is_robot1_path_init;
+extern bool is_mapViewr_active;
+
+// for play vs player mode
+extern bool go;
+extern bool player1_topview;
+extern bool player2_topview;
+
+extern bool is_finished_robot0;
+extern bool is_finished_robot1;
+extern int who_wins;
 
 #endif // MUTEX_H
